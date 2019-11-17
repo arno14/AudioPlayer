@@ -4,23 +4,32 @@
   <div class>
     <span>{{filename}}</span>
     <!-- <br /> -->
-    <span v-if="isPlaying">
-      <!-- Playing -->
-      <button @click="stop()" type="button">Stop</button>
-      <!-- <button @click="pause()" type="button">Pause</button> -->
-    </span>
-    <span v-if="!isPlaying">
-      <!-- Paused -->
-      <button @click="start()" type="button">Start</button>
-    </span>
-    <ul v-if="currentDir">
-      <li>
-        <strong>/{{currentDir.directory}}</strong>
-      </li>
-      <li v-if="currentDir.directory" @click="displayContent()">..</li>
-      <li v-for="f in currentDir.subdirs" :key="f" @click="displayContent(f)">dir:{{f}}</li>
-      <li v-for="f in currentDir.files" :key="f" @click="play(f, currentDir.directory)">file:{{f}}</li>
-    </ul>
+    <button @click="stop()" type="button" v-if="isPlaying">
+      <span class="fa fa-stop" />
+    </button>
+    <button @click="start()" type="button" v-if="!isPlaying">
+      <span class="fa fa-play" />
+    </button>
+    <div>Playlist:</div>
+    <div>
+      Explore:
+      <ul v-if="currentDir">
+        <li>
+          <strong>/{{currentDir.directory}}</strong>
+        </li>
+        <li v-if="currentDir.directory" @click="displayContent()">
+          <span class="fa fa-folder" />..
+        </li>
+        <li v-for="f in currentDir.subdirs" :key="f" @click="displayContent(f)">
+          <span class="fa fa-folder" />
+          {{f}}
+        </li>
+        <li v-for="f in currentDir.files" :key="f" @click="play(f, currentDir.directory)">
+          <span class="fa fa-music" />
+          {{f}}
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -43,8 +52,12 @@ export default {
     this.displayContent();
   },
   methods: {
-    play(filename, filepath){
-      axios.post(playerpath + "play?filename="+filename+'&filepath='+filepath).then(this.applyResponse);
+    play(filename, filepath) {
+      axios
+        .post(
+          playerpath + "play?filename=" + filename + "&filepath=" + filepath
+        )
+        .then(this.applyResponse);
     },
     start() {
       axios.post(playerpath + "start").then(this.applyResponse);

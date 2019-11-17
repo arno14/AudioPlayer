@@ -30,6 +30,9 @@ class Finder {
             }
         }
 
+        Mreturn.files.sort();
+        Mreturn.subdirs.sort();
+
         return Mreturn;
     }
 }
