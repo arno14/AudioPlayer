@@ -1,19 +1,19 @@
-
+require('dotenv').config();
 const express = require('express');
 const app = express();
-const PORT = 8015;
+const PORT = process.env.SERVER_PORT;
 const fs = require('fs');
 
 var cors = require('cors')
 app.use(cors());
 app.use(express.static('public'));
 
-const DATADIR = __dirname + '/../data';
+const DATADIR = process.env.DATA_PATH;
 const FinderClass = require('./Finder.js');
 const f = new FinderClass(DATADIR);
 
 const PlayerClass = require('./Player.js');
-const p = new PlayerClass(DATADIR + '/sample.mp3');
+const p = new PlayerClass(DATADIR, '/sample.mp3');
 
 app.get('/', (req, res) => {
   fs.readFile(__dirname + '/index.html', 'utf8', (err, html) => {
@@ -21,11 +21,20 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/files', (req, res) => {
-  f.getFiles().then((f) => res.json(f));
+app.get('/list-dir', (req, res) => {
+  console.log('path=', req.query.path);
+  f.getFiles(req.query.path).then((f) => res.json(f));
 });
 
 app.get('/current-file', (req, res) => {
+  res.json(p);
+});
+
+app.post('/play', (req, res) => {
+  let filename= req.query.filepath+'/'+req.query.filename;
+  p.setFile(filename);
+  p.stop();
+  p.play();
   res.json(p);
 });
 

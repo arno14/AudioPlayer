@@ -5,20 +5,32 @@ const player = require('play-sound')(
   // }
 );
 
+const fs = require('fs');
 
 class Player {
-  constructor(file) {
-    this.filename = file;
+  constructor(basePath, file) {
+    this.setFile(file);
     this.isPlaying = false;
-    var _audio = null;
+    var _audio = null;    
     this.setAudio = (audio) => { _audio = audio };
-    this.getAudio = () => { return _audio }
+    this.getAudio = () => { return _audio };
+    var _basePath = basePath;
+    this.getBasePath = ()=>{ return _basePath};
+  }
+
+  setFile(filename){
+    console.log('setFile', filename);
+    this.filename = filename;
   }
 
   play() {
     console.log('play()');
     this.isPlaying = true;
-    this.setAudio(player.play(this.filename, (err) => {
+    let fullFileName = this.getBasePath()+'/'+this.filename;
+    if(!fs.existsSync(fullFileName)){
+      throw "File "+fullFileName+' does not exists';
+    }
+    this.setAudio(player.play(fullFileName, (err) => {
       console.log('end playing...', err);
       this.isPlaying = false;
       // if (err && !err.killed) throw err;

@@ -1,25 +1,36 @@
 
 const fs = require('fs');
+const path = require("path");
 
 
 class Finder {
 
     constructor(basePath) {
+        basePath = path.resolve(basePath);
         this.basePath = basePath;
         this.currentPath = basePath;
     }
 
-    getFiles() {
-        var Mreturn ={
-            directory:this.currentPath,
-            files:[]
+    async getFiles(path) {
+        if(!path){
+            path = '';
         }
-        return new Promise((resolve,reject)=>{
-            fs.readdir(this.currentPath, function (err, items) {
-                Mreturn.files=items
-                resolve(Mreturn);
-            });
-        })
+        var fullPath = this.basePath+'/'+path;
+        var Mreturn = {
+            directory: path,
+            files: [],
+            subdirs: []
+        };
+        let dir = await fs.promises.opendir(fullPath);
+        for await (const item of dir) {
+            if (item.isDirectory()) {
+                Mreturn.subdirs.push(item.name);
+            } else if (item.isFile()) {
+                Mreturn.files.push(item.name);
+            }
+        }
+
+        return Mreturn;
     }
 }
 

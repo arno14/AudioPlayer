@@ -13,12 +13,14 @@
       <!-- Paused -->
       <button @click="start()" type="button">Start</button>
     </span>
-    <div v-if="currentDir">
-        <strong>{{currentDir.directory}}</strong>
-        <ul>
-          <li v-for="f in currentDir.files" :key="f">{{f}}</li>
-        </ul>
-    </div>
+    <ul v-if="currentDir">
+      <li>
+        <strong>/{{currentDir.directory}}</strong>
+      </li>
+      <li v-if="currentDir.directory" @click="displayContent()">..</li>
+      <li v-for="f in currentDir.subdirs" :key="f" @click="displayContent(f)">dir:{{f}}</li>
+      <li v-for="f in currentDir.files" :key="f" @click="play(f, currentDir.directory)">file:{{f}}</li>
+    </ul>
   </div>
 </template>
 
@@ -33,16 +35,17 @@ export default {
     return {
       isPlaying: false,
       filename: null,
-      currentDir:{}
+      currentDir: {}
     };
   },
   mounted() {
     axios.get(playerpath + "current-file").then(this.applyResponse);
-    axios.get(playerpath + "files").then((resp)=>{
-      this.currentDir = resp.data;
-    });
+    this.displayContent();
   },
   methods: {
+    play(filename, filepath){
+      axios.post(playerpath + "play?filename="+filename+'&filepath='+filepath).then(this.applyResponse);
+    },
     start() {
       axios.post(playerpath + "start").then(this.applyResponse);
     },
@@ -52,9 +55,14 @@ export default {
     pause() {
       axios.post(playerpath + "pause").then(this.applyResponse);
     },
-    applyResponse(resp){
-      this.filename=resp.data.filename;
-      this.isPlaying=resp.data.isPlaying;
+    applyResponse(resp) {
+      this.filename = resp.data.filename;
+      this.isPlaying = resp.data.isPlaying;
+    },
+    displayContent(path = "") {
+      axios.get(playerpath + "list-dir?path=" + path).then(resp => {
+        this.currentDir = resp.data;
+      });
     }
   }
 };
