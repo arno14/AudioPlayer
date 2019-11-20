@@ -1,19 +1,39 @@
 require('dotenv').config();
-const express = require('express');
-const app = express();
 const PORT = process.env.SERVER_PORT;
+const DATADIR = process.env.DATA_PATH;
+
+const express = require('express');
+const PlayerClass = require('./Player.js');
+const PlayListClass = require('./Playlist.js');
+const FinderClass = require('./Finder.js');
+const Logger = require('./Logger.js');
 const fs = require('fs');
 
-var cors = require('cors')
-app.use(cors());
+const app = express();
+
+app.use(express.json());
 app.use(express.static('public'));
 
-const DATADIR = process.env.DATA_PATH;
-const FinderClass = require('./Finder.js');
-const f = new FinderClass(DATADIR);
+const loggers = {
+  'finder': new Logger('finder'),
+  'playlist': new Logger('playlist'),
+  'player': new Logger('player'),
+};
 
-const PlayerClass = require('./Player.js');
-const p = new PlayerClass(DATADIR, '/sample.mp3');
+const finder = new FinderClass(DATADIR, loggers.finder);
+const playlist = new PlayListClass(finder, loggers.playlist);
+const player = new PlayerClass(playlist, loggers.player);
+
+function getJson() {
+  return {
+    isPlaying: player.isPlaying,
+    playlist: {
+      list: playlist.list,
+      currentIndex: playlist.currentIndex
+    }
+  }
+}
+
 
 app.get('/', (req, res) => {
   fs.readFile(__dirname + '/index.html', 'utf8', (err, html) => {
@@ -21,38 +41,38 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/list-dir', (req, res) => {
-  console.log('path=', req.query.path);
-  f.getFiles(req.query.path).then((f) => res.json(f));
+app.get('/list', (req, res) => {
+  finder.getContent(req.query.path).then((f) => res.json(f));
 });
 
 app.get('/current-file', (req, res) => {
-  res.json(p);
+  res.json(getJson());
+});
+
+app.post('/playlist/add', (req, res) => {
+  let item = req.body.item;
+  playlist.push(item).finally(() => res.json(getJson()));
+});
+
+app.post('/playlist/clear', (req, res) => {
+  playlist.clear();
+  player.stop().then(() => res.json(getJson()));
 });
 
 app.post('/play', (req, res) => {
-  let filename= req.query.filepath+'/'+req.query.filename;
-  p.setFile(filename);
-  p.stop();
-  p.play();
-  res.json(p);
+  if (req.body.item) {
+    playlist.replace(req.body.item);
+  }
+  player.restart().then(() => res.json(getJson()));
 });
 
 app.post('/start', (req, res) => {
-  p.play();
-  res.json(p);
+  player.restart().then(() => res.json(getJson()));
 });
 
 app.post('/stop', (req, res) => {
-  p.stop();
-  res.json(p);
+  player.stop().then(() => res.json(getJson()));
 });
-
-app.post('/pause', (req, res) => {
-  p.pause();
-  res.json(p);
-});
-
 
 // route non trouvé
 app.use((req, res /* , next */) => {

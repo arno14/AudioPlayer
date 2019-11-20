@@ -1,4 +1,5 @@
-const player = require('play-sound')(
+
+const playsound = require('play-sound')(
   // opts = {
   // players:['mplayer','afplay', 'mpg123','mpg321','play','omxplayer', 'aplay','cmdmp3'],
   // player:'aplay'
@@ -8,52 +9,70 @@ const player = require('play-sound')(
 const fs = require('fs');
 
 class Player {
-  constructor(basePath, file) {
-    this.setFile(file);
+
+  constructor(playlist, logger) {
+    this.playlist = playlist;
+    this.logger = logger;
+    this.audio = null;
     this.isPlaying = false;
-    var _audio = null;    
-    this.setAudio = (audio) => { _audio = audio };
-    this.getAudio = () => { return _audio };
-    var _basePath = basePath;
-    this.getBasePath = ()=>{ return _basePath};
+    this.isKilled = false;
   }
 
-  setFile(filename){
-    console.log('setFile', filename);
-    this.filename = filename;
+  restart() {
+    return this.stop()
+      .then(() => { })
+      .catch(() => { })
+      .finally(() => {
+        this.logger.log('restart() after stop')
+        this.start();
+        return true;
+      })
+  }
+
+  start() {
+    return this.play()
+      .then(() => {
+        let next = this.playlist.next();
+        this.logger.log('start() read next ', next);
+        if (next) {
+          this.start();
+        }
+      })
+      .catch(() => {
+        this.logger.log('start() rejected');
+      });
   }
 
   play() {
-    console.log('play()');
-    this.isPlaying = true;
-    let fullFileName = this.getBasePath()+'/'+this.filename;
-    if(!fs.existsSync(fullFileName)){
-      throw "File "+fullFileName+' does not exists';
+    let currentFileName = this.playlist.currentFileName();
+    this.logger.log('play(', currentFileName, ')');
+    if (!currentFileName) {
+      return new Promise((resolve, reject) => reject());
     }
-    this.setAudio(player.play(fullFileName, (err) => {
-      console.log('end playing...', err);
-      this.isPlaying = false;
-      // if (err && !err.killed) throw err;
-    })
-    );
+    this.promise = new Promise((resolve, reject) => {
+      this.isPlaying = true;
+      this.isKilled = false;
+      this.audio = playsound.play(currentFileName, (err) => {
+        this.logger.log('endplay(', currentFileName, err, this.isKilled, ')');
+        (this.isKilled) ? reject() : resolve();
+        this.isPlaying = false;
+        this.isKilled = false;
+        this.promise = null;
+      })
+    });
+    return this.promise;
   }
 
   stop() {
-    console.log('stop()');
-    this.isPlaying = false;
-    if (this.getAudio()) { //ChildProcess
-      console.log('Kill audio');
-      this.getAudio().kill();
+    if (this.audio) {
+      this.logger.log('kill process');
+      this.isKilled = true;
+      this.audio.kill();
     }
-  }
-
-  pause() {
-    console.log('pause()');
-    this.isPlaying = false;
-    if (this.audio) { //ChildProcess
-      console.log('Kill audio');
-      this.audio.sleep();
+    if (!this.promise) {
+      return new Promise(resolve => resolve());
     }
+    return this.promise.finally();
   }
 }
 
