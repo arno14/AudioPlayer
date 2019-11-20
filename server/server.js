@@ -1,6 +1,7 @@
 require('dotenv').config();
 const PORT = process.env.SERVER_PORT;
 const DATADIR = process.env.DATA_PATH;
+const SAVEPATH = process.env.SAVE_PATH;
 
 const express = require('express');
 const PlayerClass = require('./Player.js');
@@ -21,7 +22,7 @@ const loggers = {
 };
 
 const finder = new FinderClass(DATADIR, loggers.finder);
-const playlist = new PlayListClass(finder, loggers.playlist);
+const playlist = new PlayListClass(finder, SAVEPATH, loggers.playlist);
 const player = new PlayerClass(playlist, loggers.player);
 
 function getJson() {
@@ -29,8 +30,9 @@ function getJson() {
     isPlaying: player.isPlaying,
     playlist: {
       list: playlist.list,
-      currentIndex: playlist.currentIndex
-    }
+      currentIndex: playlist.currentIndex,
+      current: playlist.current()
+    },
   }
 }
 
@@ -54,9 +56,14 @@ app.post('/playlist/add', (req, res) => {
   playlist.push(item).finally(() => res.json(getJson()));
 });
 
+app.post('/playlist/remove', (req, res) => {
+  let item = req.body.item;
+  playlist.remove(item).finally(() => res.json(getJson()));
+});
+
 app.post('/playlist/clear', (req, res) => {
   playlist.clear();
-  player.stop().then(() => res.json(getJson()));
+  player.stop().finally(() => res.json(getJson()));
 });
 
 app.post('/play', (req, res) => {
