@@ -5,26 +5,29 @@
     <v-toolbar>
       <v-toolbar-title>{{filename}}</v-toolbar-title>
       <v-spacer></v-spacer>
+
       <v-toolbar-items>
-        <v-btn @click="stop()" v-if="isPlaying && filename" title="Play">
-          <span class="fa fa-stop" />
+        <v-btn icon>
+          <v-icon v-if="hasPlaylist" color="primary">{{playlist.list.length}}</v-icon>
         </v-btn>
-        <v-btn @click="start()" v-if="!isPlaying && filename" title="Stop">
-          <span class="fa fa-play" />
-        </v-btn>
-        <v-btn @click="playlistClear()" v-if="hasPlaylist && !displayExplorer" title="Play">
+        <v-btn icon @click="playlistClear()" v-if="hasPlaylist && !displayExplorer" title="Play">
           <span class="fa fa-trash" />
         </v-btn>
-        <v-btn @click="displayExplorer=false" v-if="hasPlaylist && displayExplorer" title="Playlist">
+        <v-btn icon @click="stop()" v-if="isPlaying && filename" title="Play">
+          <span class="fa fa-stop" />
+        </v-btn>
+        <v-btn icon @click="start()" v-if="!isPlaying && filename" title="Stop">
+          <span class="fa fa-play" />
+        </v-btn>
+        <v-btn icon @click="displayExplorer=false" v-if="hasPlaylist &&  displayExplorer" title="Playlist">
           <span class="fa fa-list" />
         </v-btn>
-        <v-btn @click="displayExplorer=true" v-if="!displayExplorer" title="Explorer">
+        <v-btn icon @click="displayExplorer=true" v-if="!displayExplorer" title="Explorer">
           <span class="fa fa-folder" />
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
 
-    <!-- Tab Playlist-->
     <v-list v-if="hasPlaylist && !displayExplorer">
       <v-list-item
         v-for="(f,k) in playlist.list"
@@ -43,7 +46,6 @@
       </v-list-item>
     </v-list>
 
-    <!-- Explorer Tabs -->
     <v-list v-if="displayExplorer">
       <v-list-item v-if="currentDir" :title="JSON.stringify(currentDir)">
         <v-list-item-icon @click="list(currentDir.parent)">
@@ -62,7 +64,6 @@
         </v-list-item-action>
       </v-list-item>
     </v-list>
-
   </div>
 </template>
 
