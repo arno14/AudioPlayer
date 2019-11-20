@@ -2,60 +2,67 @@
 
 <template>
   <div class>
-    <span>{{filename}}</span>
-    <!-- <br /> -->
-    <button @click="stop()" type="button" v-if="isPlaying">
-      <span class="fa fa-stop" />
-    </button>
-    <button @click="start()" type="button" v-if="!isPlaying">
-      <span class="fa fa-play" />
-    </button>
-    <button @click="playlistClear()" type="button" v-if="hasPlaylist">
-      <span class="fa fa-trash" />
-    </button>
-    <div>
-      Playlist:
-      <ul v-if="playlist">
-        <li
-          v-for="(f,k) in playlist.list"
-          :key="k"
-          :class="{active:k==playlist.currentIndex}"
-          :title="JSON.stringify(f)"
-        >
-          {{f.path}}/{{f.name}}
-          <span class="fa fa-play" @click="play(f)" />
-        </li>
-      </ul>
-    </div>
-    <div>
-      Explore:
-      <ul v-if="currentDir">
-        <li>
-          <span
-            class="fa fa-chevron-left"
-            v-if="currentDir.parent"
-            @click="list(currentDir.parent)"
-            :title="JSON.stringify(currentDir.parent)"
-          />
-          <strong>{{currentDir.path}}</strong>
-          <span class="fa fa-plus" @click="playlistAdd(currentDir)" />
-        </li>
-        <li v-for="i in currentDir.list" :key="i.path+i.name" :title="JSON.stringify(i)">
-          <div v-if="i.type=='dir'">
-            <span class="fa fa-folder" @click="list(i)" />
-            {{i.name}}
-            <span class="fa fa-eye" @click="list(i)" />
-            <span class="fa fa-plus" @click="playlistAdd(i)" />
-          </div>
-          <div v-if="i.type=='file'">
-            <span class="fa fa-music" />
-            {{i.name}}
-            <span class="fa fa-play" @click="play(i)" />
-            <span class="fa fa-plus" @click="playlistAdd(i)" />
-          </div>
-        </li>
-      </ul>
-    </div>
+    <v-toolbar>
+      <v-toolbar-title>{{filename}}</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <v-btn @click="stop()" v-if="isPlaying && filename" title="Play">
+          <span class="fa fa-stop" />
+        </v-btn>
+        <v-btn @click="start()" v-if="!isPlaying && filename" title="Stop">
+          <span class="fa fa-play" />
+        </v-btn>
+        <v-btn @click="playlistClear()" v-if="hasPlaylist && !displayExplorer" title="Play">
+          <span class="fa fa-trash" />
+        </v-btn>
+        <v-btn @click="displayExplorer=false" v-if="hasPlaylist && displayExplorer" title="Playlist">
+          <span class="fa fa-list" />
+        </v-btn>
+        <v-btn @click="displayExplorer=true" v-if="!displayExplorer" title="Explorer">
+          <span class="fa fa-folder" />
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <!-- Tab Playlist-->
+    <v-list v-if="hasPlaylist && !displayExplorer">
+      <v-list-item
+        v-for="(f,k) in playlist.list"
+        :key="k"
+        :class="{active_playing:k==playlist.currentIndex}"
+        :title="JSON.stringify(f)"
+      >
+        <v-list-item-icon>
+          <span v-if="k!=playlist.currentIndex || !isPlaying" class="fa fa-play" @click="play(f)" />
+          <span v-if="k==playlist.currentIndex && isPlaying" class="fa fa-stop" @click="stop()" />
+        </v-list-item-icon>
+        <v-list-item-content>{{f.path}}/{{f.name}}</v-list-item-content>
+        <v-list-item-action>
+          <span class="fa fa-minus" @click="playlistRemove(f)" />
+        </v-list-item-action>
+      </v-list-item>
+    </v-list>
+
+    <!-- Explorer Tabs -->
+    <v-list v-if="displayExplorer">
+      <v-list-item v-if="currentDir" :title="JSON.stringify(currentDir)">
+        <v-list-item-icon @click="list(currentDir.parent)">
+          <span class="fa fa-chevron-left" />
+        </v-list-item-icon>
+        <strong>{{currentDir.path}}</strong>
+      </v-list-item>
+      <v-list-item v-for="i in currentDir.list" :key="i.path+i.name" :title="JSON.stringify(i)">
+        <v-list-item-icon>
+          <span v-if="i.type=='dir'" class="fa fa-folder" @click="list(i)" />
+          <span v-if="i.type=='file'" class="fa fa-music" @click="play(i)" />
+        </v-list-item-icon>
+        <v-list-item-content>{{i.name}}</v-list-item-content>
+        <v-list-item-action>
+          <span class="fa fa-plus" @click="playlistAdd(i)" />
+        </v-list-item-action>
+      </v-list-item>
+    </v-list>
+
   </div>
 </template>
 
@@ -69,18 +76,33 @@ export default {
   data() {
     return {
       isPlaying: false,
-      filename: null,
       playlist: null,
-      currentDir: {}
+      currentDir: {},
+      displayExplorer: false
     };
   },
   computed: {
+    filename() {
+      if (
+        this.playlist &&
+        this.playlist.current &&
+        this.playlist.current.name
+      ) {
+        return this.playlist.current.name;
+      }
+      return null;
+    },
     hasPlaylist() {
       return this.playlist ? this.playlist.list.length > 0 : false;
     }
   },
   mounted() {
-    axios.get(playerpath + "current-file").then(this.applyResponse);
+    axios.get(playerpath + "current-file").then(resp => {
+      this.applyResponse(resp);
+      if (!this.hasPlaylist) {
+        this.displayExplorer = true;
+      }
+    });
     this.list();
   },
   methods: {
@@ -90,6 +112,11 @@ export default {
     playlistAdd(i) {
       axios
         .post(playerpath + "playlist/add", { item: i })
+        .then(this.applyResponse);
+    },
+    playlistRemove(i) {
+      axios
+        .post(playerpath + "playlist/remove", { item: i })
         .then(this.applyResponse);
     },
     playlistClear() {
@@ -116,7 +143,6 @@ export default {
       });
     },
     applyResponse(resp) {
-      this.filename = resp.data.filename;
       this.isPlaying = resp.data.isPlaying;
       this.playlist = resp.data.playlist;
     }
@@ -126,6 +152,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.active_playing {
+  border: 1px dashed black;
+}
 li.active {
   border: 1px dashed black;
 }

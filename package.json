@@ -13,13 +13,18 @@
     "express": "^4.17.1",
     "play-sound": "^1.1.3",
     "supervisor": "^0.12.0",
-    "vue-loader": "^15.7.2"
+    "vue-loader": "^15.7.2",
+    "vuetify": "^2.1.10"
   },
   "scripts": {
     "server": "supervisor --watch server server/server.js",
     "encore": "encore dev --watch"
   },
   "devDependencies": {
+    "deepmerge": "^4.2.2",
+    "fibers": "^4.0.2",
+    "sass": "^1.23.7",
+    "sass-loader": "^8.0.0",
     "vue": "^2.6.10",
     "vue-template-compiler": "^2.6.10",
     "webpack-notifier": "^1.8.0"
