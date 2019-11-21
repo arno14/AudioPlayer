@@ -14,6 +14,6 @@
 - gérer plusieurs playlist
 - gestion des erreurs
 - message sur ajout
-- compteur de morceaux dans la playlist
+- OK / compteur de morceaux dans la playlist
 - bouton précédent/suivant
 - if remove item from playlist, stop playing it

@@ -9,7 +9,7 @@
       <v-spacer></v-spacer>
       <v-toolbar-items>
         <v-btn icon>
-          <v-icon v-if="hasPlaylist" color="primary">{{playlist.list.length}}</v-icon>
+        <span v-if="hasPlaylist" class="playlist-counter">{{playlist.list.length}}</span>
         </v-btn>
         <!-- <v-btn icon @click="playlistClear()" v-if="hasPlaylist && !displayExplorer" title="Play">
           <span class="fa fa-trash" />
@@ -183,6 +183,16 @@ export default {
 }
 .content {
   margin-top: 3.5em;
+}
+.playlist-counter {
+  font-weight: bold;
+  background-color: crimson;
+  color: black;
+  display: inline-block;
+  padding: 0.4em;
+  border-radius: 50%;
+  width: 2em;
+  height: 2em;
 }
 a {
   color: #42b983;
