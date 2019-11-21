@@ -10,16 +10,21 @@
         <v-btn icon>
           <v-icon v-if="hasPlaylist" color="primary">{{playlist.list.length}}</v-icon>
         </v-btn>
-        <v-btn icon @click="playlistClear()" v-if="hasPlaylist && !displayExplorer" title="Play">
+        <!-- <v-btn icon @click="playlistClear()" v-if="hasPlaylist && !displayExplorer" title="Play">
           <span class="fa fa-trash" />
-        </v-btn>
+        </v-btn>-->
         <v-btn icon @click="stop()" v-if="isPlaying && filename" title="Play">
           <span class="fa fa-stop" />
         </v-btn>
         <v-btn icon @click="start()" v-if="!isPlaying && filename" title="Stop">
           <span class="fa fa-play" />
         </v-btn>
-        <v-btn icon @click="displayExplorer=false" v-if="hasPlaylist &&  displayExplorer" title="Playlist">
+        <v-btn
+          icon
+          @click="displayExplorer=false"
+          v-if="hasPlaylist &&  displayExplorer"
+          title="Playlist"
+        >
           <span class="fa fa-list" />
         </v-btn>
         <v-btn icon @click="displayExplorer=true" v-if="!displayExplorer" title="Explorer">
@@ -71,6 +76,9 @@
 /* eslint-disable */
 const axios = require("axios");
 
+import io from "socket.io-client";
+var socket = io.connect('');//localhost:8015
+
 const playerpath = "/";
 export default {
   name: "App",
@@ -105,6 +113,13 @@ export default {
       }
     });
     this.list();
+    socket.on("connect", data => {
+      // console.log('on connect');
+      socket.on("appState", data => {
+        // console.log("websocket, appState", data );
+        this.applyResponse({ data });
+      });
+    });
   },
   methods: {
     play(i) {

@@ -16,6 +16,7 @@ class Player {
     this.audio = null;
     this.isPlaying = false;
     this.isKilled = false;
+    this.onMusicPlay = ()=>{};
   }
 
   restart() {
@@ -45,6 +46,7 @@ class Player {
   }
 
   play() {
+    this.onMusicPlay();
     let currentFileName = this.playlist.currentFileName();
     this.logger.log('play(', currentFileName, ')');
     if (!currentFileName) {
@@ -64,6 +66,7 @@ class Player {
           filename:currentFileName
         })
       })
+      this.onMusicPlay();
     });
     return this.promise;
   }

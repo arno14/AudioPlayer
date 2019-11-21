@@ -11,15 +11,31 @@ const Logger = require('./Logger.js');
 const fs = require('fs');
 
 const app = express();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
 
 app.use(express.json());
 app.use(express.static('public'));
 
+
 const loggers = {
-  'finder': new Logger('finder'),
-  'playlist': new Logger('playlist'),
-  'player': new Logger('player'),
+  'finder': new Logger('finder', true),
+  'playlist': new Logger('playlist', true),
+  'player': new Logger('player', true),
+  'websocket': new Logger('websocket', true)
 };
+
+io.on('connection', function (client) {
+  loggers.websocket.log('connection');
+});
+
+// let counter = 0,
+//     interval = 10000;
+// setInterval(() => {
+//   counter+=interval;
+//   loggers.websocket.log('emit ping', counter);
+//   io.emit('ping', { since: counter });
+// }, interval);
 
 const finder = new FinderClass(DATADIR, loggers.finder);
 const playlist = new PlayListClass(finder, SAVEPATH, loggers.playlist);
@@ -36,6 +52,10 @@ function getJson() {
   }
 }
 
+player.onMusicPlay = () => {
+  loggers.websocket.log('onMusicPlay, emit appState');
+  io.emit('appState', getJson());
+}
 
 app.get('/', (req, res) => {
   fs.readFile(__dirname + '/index.html', 'utf8', (err, html) => {
@@ -70,7 +90,11 @@ app.post('/play', (req, res) => {
   if (req.body.item) {
     playlist.replace(req.body.item);
   }
-  player.restart().then(() => res.json(getJson()));
+  player.restart().then(() => {
+    // loggers.websocket.log('Emit appState', getJson());
+    // io.emit('appState', getJson())
+    res.json(getJson())
+  });
 });
 
 app.post('/start', (req, res) => {
@@ -87,6 +111,6 @@ app.use((req, res /* , next */) => {
   res.status(404).send('Page introuvable !');
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(` ### Example app is listening on port ${PORT}`);
 });

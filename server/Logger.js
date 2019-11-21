@@ -1,5 +1,5 @@
 class Logger {
-    constructor(channel) {
+    constructor(channel, isSilent = false) {
         this.channel = channel;
         let diff = 10 - this.channel.length;
         for (let j = 0; j < diff; j++) {
@@ -7,7 +7,7 @@ class Logger {
         }
         this.channel += ': ';
 
-        this.silent = false;
+        this.silent = isSilent;
     }
 
     log() {
