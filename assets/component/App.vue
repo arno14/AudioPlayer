@@ -1,11 +1,12 @@
 /* eslint-disable */
 
 <template>
-  <div class>
-    <v-toolbar>
+  <v-app>
+    <!-- <v-navigation-drawer permanent app fixed > -->
+
+    <v-app-bar fixed>
       <v-toolbar-title>{{filename}}</v-toolbar-title>
       <v-spacer></v-spacer>
-
       <v-toolbar-items>
         <v-btn icon>
           <v-icon v-if="hasPlaylist" color="primary">{{playlist.list.length}}</v-icon>
@@ -31,45 +32,54 @@
           <span class="fa fa-folder" />
         </v-btn>
       </v-toolbar-items>
-    </v-toolbar>
+    </v-app-bar>
 
-    <v-list v-if="hasPlaylist && !displayExplorer">
-      <v-list-item
-        v-for="(f,k) in playlist.list"
-        :key="k"
-        :class="{active_playing:k==playlist.currentIndex}"
-        :title="JSON.stringify(f)"
-      >
-        <v-list-item-icon>
-          <span v-if="k!=playlist.currentIndex || !isPlaying" class="fa fa-play" @click="play(f)" />
-          <span v-if="k==playlist.currentIndex && isPlaying" class="fa fa-stop" @click="stop()" />
-        </v-list-item-icon>
-        <v-list-item-content>{{f.path}}/{{f.name}}</v-list-item-content>
-        <v-list-item-action>
-          <span class="fa fa-minus" @click="playlistRemove(f)" />
-        </v-list-item-action>
-      </v-list-item>
-    </v-list>
+    <!-- <span class="spacer"></span> -->
+    <div class="content">
+      <v-list v-if="hasPlaylist && !displayExplorer">
+        <v-list-item
+          v-for="(f,k) in playlist.list"
+          :key="k"
+          :class="{active_playing:k==playlist.currentIndex}"
+          :title="JSON.stringify(f)"
+        >
+          <v-list-item-icon>
+            <span
+              v-if="k!=playlist.currentIndex || !isPlaying"
+              class="fa fa-play"
+              @click="play(f)"
+            />
+            <span v-if="k==playlist.currentIndex && isPlaying" class="fa fa-stop" @click="stop()" />
+          </v-list-item-icon>
+          <v-list-item-content>{{f.path}}/{{f.name}}</v-list-item-content>
+          <v-list-item-action>
+            <span class="fa fa-minus" @click="playlistRemove(f)" />
+          </v-list-item-action>
+        </v-list-item>
+      </v-list>
 
-    <v-list v-if="displayExplorer">
-      <v-list-item v-if="currentDir" :title="JSON.stringify(currentDir)">
-        <v-list-item-icon @click="list(currentDir.parent)">
-          <span class="fa fa-chevron-left" />
-        </v-list-item-icon>
-        <strong>{{currentDir.path}}</strong>
-      </v-list-item>
-      <v-list-item v-for="i in currentDir.list" :key="i.path+i.name" :title="JSON.stringify(i)">
-        <v-list-item-icon>
-          <span v-if="i.type=='dir'" class="fa fa-folder" @click="list(i)" />
-          <span v-if="i.type=='file'" class="fa fa-music" @click="play(i)" />
-        </v-list-item-icon>
-        <v-list-item-content>{{i.name}}</v-list-item-content>
-        <v-list-item-action>
-          <span class="fa fa-plus" @click="playlistAdd(i)" />
-        </v-list-item-action>
-      </v-list-item>
-    </v-list>
-  </div>
+      <v-list v-if="displayExplorer">
+        <v-list-item v-if="currentDir" :title="JSON.stringify(currentDir)">
+          <v-list-item-icon @click="list(currentDir.parent)">
+            <span class="fa fa-chevron-left" />
+          </v-list-item-icon>
+          <strong>{{currentDir.path}}</strong>
+        </v-list-item>
+        <v-list-item v-for="i in currentDir.list" :key="i.path+i.name" :title="JSON.stringify(i)">
+          <v-list-item-icon>
+            <span v-if="i.type=='dir'" class="fa fa-folder" @click="list(i)" />
+            <span v-if="i.type=='file'" class="fa fa-music" @click="play(i)" />
+          </v-list-item-icon>
+          <v-list-item-content>{{i.name}}</v-list-item-content>
+          <v-list-item-action>
+            <span class="fa fa-plus" @click="playlistAdd(i)" />
+          </v-list-item-action>
+        </v-list-item>
+      </v-list>
+    </div>
+
+    <!-- </v-navigation-drawer> -->
+  </v-app>
 </template>
 
 <script>
@@ -77,7 +87,7 @@
 const axios = require("axios");
 
 import io from "socket.io-client";
-var socket = io.connect('');//localhost:8015
+var socket = io.connect(""); //localhost:8015
 
 const playerpath = "/";
 export default {
@@ -171,21 +181,9 @@ export default {
 .active_playing {
   border: 1px dashed black;
 }
-li.active {
-  border: 1px dashed black;
+.content {
+  margin-top: 3.5em;
 }
-/* h1,
-h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-} */
 a {
   color: #42b983;
 }

@@ -12,6 +12,6 @@ new Vue({
   el: '#app',
   vuetify : new Vuetify(),
   components:{App},
-  template: '<v-app id="app"><App/></v-app>'
+  template: '<App/>'
   // render: h => h(App),
 });
