@@ -15,6 +15,7 @@ const compare = function compare(a, b) {
     return 0;
 }
 
+
 class Finder {
 
     constructor(basePath, logger) {
@@ -32,11 +33,17 @@ class Finder {
 
         let dir = await fs.promises.opendir(fullPath);
         for await (const item of dir) {
-            list.push({
+            let i = {
                 name: item.name,
                 type: (item.isDirectory()) ? 'dir' : 'file',
                 path: path
-            });
+            };
+            if(i.type==='file'){
+                if(!i.name.match(/.mp3/)){
+                    continue;
+                }
+            }
+            list.push(i);
         }
 
         list.sort(compare);
