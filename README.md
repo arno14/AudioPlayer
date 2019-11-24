@@ -11,13 +11,15 @@ Requirments:
 ```
 git clone https://github.com/arno14/AudioPlayer.git
 
+cd AudioPlayer
+
 npm install
 
 cp .env.dist .env
 
 nano .env
 
-npm run encore
+node_modules/.bin/encore production
 
 npm run server
 
