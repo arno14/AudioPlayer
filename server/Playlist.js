@@ -10,8 +10,8 @@ class Playlist {
         this.currentIndex = null;
 
         if (fs.existsSync(this.savePath)) {
-            let rawdata = fs.readFileSync(this.savePath);
-            let saved = JSON.parse(rawdata);
+            let rawdata = fs.readFileSync(this.savePath),
+                saved = JSON.parse(rawdata);
             if (saved.list) {
                 this.list = saved.list;
                 this.currentIndex = saved.currentIndex;
@@ -32,6 +32,36 @@ class Playlist {
         return null;
     }
 
+    current() {
+        if (this.currentIndex === null) {
+            if (this.list.length > 0) {
+                this.currentIndex = 0;
+            }
+        }
+        if (typeof this.list[this.currentIndex] !== 'undefined') {
+            return this.list[this.currentIndex];
+        }
+    }
+
+    currentFileName() {
+        let current = this.current();
+        if (!current) {
+            return null;
+        }
+        return this.finder.getFileName(current);
+    }
+
+    next() {
+        let nextIndex = this.currentIndex + 1;
+        if (typeof this.list[nextIndex] !== 'undefined') {
+            this.currentIndex = nextIndex;
+            return this.list[nextIndex];
+        }
+        this.currentIndex = null;
+        this.save();
+        return null;
+    }
+    
     remove(item) {
         this.logger.log('remove(', item, ')');
         let existingIndex = this.find(item);
@@ -40,6 +70,7 @@ class Playlist {
         } else {
             this.logger.warn('remove(), not found', existingIndex);
         }
+        this.save();
         return new Promise(resolve => resolve());
     }
 
@@ -79,36 +110,6 @@ class Playlist {
                 resolve();
             });
         })
-    }
-
-    current() {
-        if (this.currentIndex === null) {
-            if (this.list.length > 0) {
-                this.currentIndex = 0;
-            }
-        }
-        if (typeof this.list[this.currentIndex] !== 'undefined') {
-            return this.list[this.currentIndex];
-        }
-    }
-
-    currentFileName() {
-        let current = this.current();
-        if (!current) {
-            return null;
-        }
-        return this.finder.getFileName(current);
-    }
-
-    next() {
-        let nextIndex = this.currentIndex + 1;
-        if (typeof this.list[nextIndex] !== 'undefined') {
-            this.currentIndex = nextIndex;
-            return this.list[nextIndex];
-        }
-        this.currentIndex = null;
-        this.save();
-        return null;
     }
 
     clear() {

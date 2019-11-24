@@ -1,93 +1,49 @@
-/* eslint-disable */
-
 <template>
   <v-app>
-    <!-- <v-navigation-drawer permanent app fixed > -->
-
     <v-app-bar fixed>
       <v-toolbar-title>{{filename}}</v-toolbar-title>
+      <v-btn icon @click="stop()" v-if="isPlaying && filename" title="Play">
+        <v-icon>fa fa-stop</v-icon>
+      </v-btn>
+      <v-btn icon @click="start()" v-if="!isPlaying && filename" title="Stop">
+        <v-icon>fa fa-play</v-icon>
+      </v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-items>
-        <v-btn icon>
-        <span v-if="hasPlaylist" class="playlist-counter">{{playlist.list.length}}</span>
+        <!-- <router-link :to="{name: 'playlist', query:$route.query}" replace>GO to Playlist</router-link> -->
+        <v-btn icon title="Playlist" :to="{name: 'playlist', query:$route.query}">
+          <v-badge>
+            <template v-if="playlistCount" v-slot:badge>{{playlistCount}}</template>
+            <v-icon>fa fa-list</v-icon>
+          </v-badge>
         </v-btn>
-        <!-- <v-btn icon @click="playlistClear()" v-if="hasPlaylist && !displayExplorer" title="Play">
-          <span class="fa fa-trash" />
-        </v-btn>-->
-        <v-btn icon @click="stop()" v-if="isPlaying && filename" title="Play">
-          <span class="fa fa-stop" />
-        </v-btn>
-        <v-btn icon @click="start()" v-if="!isPlaying && filename" title="Stop">
-          <span class="fa fa-play" />
-        </v-btn>
-        <v-btn
-          icon
-          @click="displayExplorer=false"
-          v-if="hasPlaylist &&  displayExplorer"
-          title="Playlist"
-        >
-          <span class="fa fa-list" />
-        </v-btn>
-        <v-btn icon @click="displayExplorer=true" v-if="!displayExplorer" title="Explorer">
-          <span class="fa fa-folder" />
+        <v-btn icon title="Explorer" :to="{name:'explorer', query: $route.query}">
+          <v-icon>fa fa-folder</v-icon>
         </v-btn>
       </v-toolbar-items>
     </v-app-bar>
-
-    <!-- <span class="spacer"></span> -->
+    <span class="spacer"></span>
     <div class="content">
-      <v-list v-if="hasPlaylist && !displayExplorer">
-        <v-list-item
-          v-for="(f,k) in playlist.list"
-          :key="k"
-          :class="{active_playing:k==playlist.currentIndex}"
-          :title="JSON.stringify(f)"
-        >
-          <v-list-item-icon>
-            <span
-              v-if="k!=playlist.currentIndex || !isPlaying"
-              class="fa fa-play"
-              @click="play(f)"
-            />
-            <span v-if="k==playlist.currentIndex && isPlaying" class="fa fa-stop" @click="stop()" />
-          </v-list-item-icon>
-          <v-list-item-content>{{f.path}}/{{f.name}}</v-list-item-content>
-          <v-list-item-action>
-            <span class="fa fa-minus" @click="playlistRemove(f)" />
-          </v-list-item-action>
-        </v-list-item>
-      </v-list>
-
-      <v-list v-if="displayExplorer">
-        <v-list-item v-if="currentDir" :title="JSON.stringify(currentDir)">
-          <v-list-item-icon @click="list(currentDir.parent)">
-            <span class="fa fa-chevron-left" />
-          </v-list-item-icon>
-          <strong>{{currentDir.path}}</strong>
-        </v-list-item>
-        <v-list-item v-for="i in currentDir.list" :key="i.path+i.name" :title="JSON.stringify(i)">
-          <v-list-item-icon>
-            <span v-if="i.type=='dir'" class="fa fa-folder" @click="list(i)" />
-            <span v-if="i.type=='file'" class="fa fa-music" @click="play(i)" />
-          </v-list-item-icon>
-          <v-list-item-content>{{i.name}}</v-list-item-content>
-          <v-list-item-action>
-            <span class="fa fa-plus" @click="playlistAdd(i)" />
-          </v-list-item-action>
-        </v-list-item>
-      </v-list>
+      <router-view
+        v-bind:currentDir="currentDir"
+        v-bind:playlist="playlist"
+        v-bind:isPlaying="isPlaying"
+        @list="list"
+        @play="play"
+        @stop="stop"
+        @playlistAdd="playlistAdd"
+        @playlistRemove="playlistRemove"
+      ></router-view>
     </div>
-
-    <!-- </v-navigation-drawer> -->
   </v-app>
 </template>
 
 <script>
-/* eslint-disable */
+
 const axios = require("axios");
 
 import io from "socket.io-client";
-var socket = io.connect(""); //localhost:8015
+var socket = io.connect(); //localhost:8015
 
 const playerpath = "/";
 export default {
@@ -96,33 +52,35 @@ export default {
     return {
       isPlaying: false,
       playlist: null,
-      currentDir: {},
-      displayExplorer: false
+      currentDir: {}
     };
   },
   computed: {
     filename() {
-      if (
-        this.playlist &&
-        this.playlist.current &&
-        this.playlist.current.name
-      ) {
+      if (this.playlist && this.playlist.current) {
         return this.playlist.current.name;
       }
       return null;
     },
-    hasPlaylist() {
-      return this.playlist ? this.playlist.list.length > 0 : false;
+    playlistCount() {
+      if (this.playlist && this.playlist.list) {
+        return this.playlist.list.length;
+      }
+      return 0;
     }
   },
   mounted() {
     axios.get(playerpath + "current-file").then(resp => {
       this.applyResponse(resp);
-      if (!this.hasPlaylist) {
-        this.displayExplorer = true;
+      if (this.playlistCount) {
+        return;
+      }
+      if (this.$route.name !== "explorer") {
+        console.log("redirect to explorer, no playlist");
+        this.$router.replace({ name: "explorer", query: this.$route.query });
       }
     });
-    this.list();
+    this.list(this.$route.query.pathname);
     socket.on("connect", data => {
       // console.log('on connect');
       socket.on("appState", data => {
@@ -158,13 +116,22 @@ export default {
       axios.post(playerpath + "pause").then(this.applyResponse);
     },
     list(i = null) {
-      let path = null;
-      if (i) {
-        path = i.path;
-        path += i.path && i.name ? "/" : "";
-        path += i.name;
+      // console.log("list ", i, this.$route.query);
+      let pathname = null;
+      if (typeof i === "string") {
+        pathname = i;
+      } else if (i) {
+        pathname = i.path;
+        pathname += i.path && i.name ? "/" : "";
+        pathname += i.name;
       }
-      axios.get(playerpath + "list", { params: { path } }).then(resp => {
+      if (this.$route.query.pathname !== pathname) {
+        // console.log("router replace pathname", pathname);
+        this.$router.replace({ query: { pathname } });
+      }
+
+      axios.get(playerpath + "list", { params: { pathname } }).then(resp => {
+        // console.log("post list ", i, this.$route.query);
         this.currentDir = resp.data;
       });
     },
@@ -177,7 +144,13 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style>
+.v-list-item__action {
+  align-self: flex-start !important;
+}
+.router-link.router-link-active {
+  background: red;
+}
 .active_playing {
   border: 1px dashed black;
 }
