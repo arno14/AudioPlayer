@@ -39,7 +39,7 @@ class Finder {
                 path: path
             };
             if(i.type==='file'){
-                if(!i.name.match(/.mp3|.wav/)){
+                if(!i.name.match(/.mp3|.wav/i)){
                     continue;
                 }
             }
