@@ -5,7 +5,7 @@
       <v-btn icon @click="stop()" v-if="isPlaying && filename" title="Play">
         <v-icon>fa fa-stop</v-icon>
       </v-btn>
-      <v-btn icon @click="start()" v-if="!isPlaying && filename" title="Stop">
+      <v-btn icon @click="play()" v-if="!isPlaying && filename" title="Stop">
         <v-icon>fa fa-play</v-icon>
       </v-btn>
       <v-spacer></v-spacer>
@@ -18,7 +18,7 @@
           </v-badge>
         </v-btn>
         <v-btn icon title="Explorer" :to="{name:'explorer', query: $route.query}">
-          <v-icon>fa fa-folder</v-icon>
+          <v-icon>fa fa-folder-open</v-icon>
         </v-btn>
       </v-toolbar-items>
     </v-app-bar>
@@ -74,7 +74,7 @@ export default {
   },
   mounted() {
     this.countLoading++;
-    axios.get(playerpath + "current-file").then(resp => {
+    axios.get(playerpath + "app-state").then(resp => {
       this.applyResponse(resp);
       if (this.playlistCount) {
         return;
@@ -97,6 +97,12 @@ export default {
     play(i) {
       axios.post(playerpath + "play", { item: i }).then(this.applyResponse);
     },
+    stop() {
+      axios.post(playerpath + "stop").then(this.applyResponse);
+    },
+    // pause() {
+    //   axios.post(playerpath + "pause").then(this.applyResponse);
+    // },
     playlistAdd(i) {
       axios
         .post(playerpath + "playlist/add", { item: i })
@@ -109,15 +115,6 @@ export default {
     },
     playlistClear() {
       axios.post(playerpath + "playlist/clear").then(this.applyResponse);
-    },
-    start() {
-      axios.post(playerpath + "start").then(this.applyResponse);
-    },
-    stop() {
-      axios.post(playerpath + "stop").then(this.applyResponse);
-    },
-    pause() {
-      axios.post(playerpath + "pause").then(this.applyResponse);
     },
     list(i = null) {
       // console.log("list ", i, this.$route.query);

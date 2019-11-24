@@ -1,5 +1,5 @@
 class Logger {
-    constructor(channel, isSilent = false) {
+    constructor(channel, isVerbose = false) {
         this.channel = channel;
         let diff = 10 - this.channel.length;
         for (let j = 0; j < diff; j++) {
@@ -7,15 +7,15 @@ class Logger {
         }
         this.channel += ': ';
 
-        this.silent = isSilent;
+        this.isVerbose = isVerbose;
     }
 
     log() {
-        if (!this.silent) {
-            let args = [this.channel].concat(arguments);
+        if (this.isVerbose) {
             console.log.apply(this, this.getArgs(arguments));
         }
     }
+    
     warn() {
         console.warn.apply(this, this.getArgs(arguments));
     }
@@ -27,7 +27,6 @@ class Logger {
         }
         return r;
     }
-
 }
 
 module.exports = Logger;

@@ -19,10 +19,11 @@ app.use(express.static('public'));
 
 
 const loggers = {
-  'finder': new Logger('finder', true),
-  'playlist': new Logger('playlist', true),
-  'player': new Logger('player', true),
-  'websocket': new Logger('websocket', true)
+  'finder': new Logger('finder'),
+  'playlist': new Logger('playlist'),
+  'player': new Logger('player'),
+  'websocket': new Logger('websocket'),
+  controller: new Logger('controller'),
 };
 
 io.on('connection', function (client) {
@@ -39,7 +40,7 @@ io.on('connection', function (client) {
 
 const finder = new Finder(DATADIR, loggers.finder);
 const playlist = new PlayList(finder, SAVEPATH, loggers.playlist);
-const player = new Player(playlist, loggers.player);
+const player = new Player(loggers.player);
 
 function getAppState() {
   return {
@@ -56,6 +57,10 @@ player.onMusicPlay = () => {
   loggers.websocket.log('onMusicPlay, emit appState');
   io.emit('appState', getAppState());
 }
+player.onMusicStop = () => {
+  loggers.websocket.log('onMusicStop, emit appState');
+  io.emit('appState', getAppState());
+}
 
 app.get('/', (req, res) => {
   fs.readFile(__dirname + '/index.html', 'utf8', (err, html) => {
@@ -63,14 +68,12 @@ app.get('/', (req, res) => {
   });
 });
 
-app.get('/list', (req, res) => {
-  finder.getContent(req.query.pathname).then((f) => res.json(f));
+app.get('/app-state', (req, res) => {
+  res.json(getAppState());
 });
 
-app.get('/current-file', (req, res) => {
-  setTimeout(()=>{
-    res.json(getAppState());
-  },2000); 
+app.get('/list', (req, res) => {
+  finder.getContent(req.query.pathname).then((f) => res.json(f));
 });
 
 app.post('/playlist/add', (req, res) => {
@@ -89,18 +92,13 @@ app.post('/playlist/clear', (req, res) => {
 });
 
 app.post('/play', (req, res) => {
-  if (req.body.item) {
-    playlist.replace(req.body.item);
-  }
-  player.restart().then(() => {
-    // loggers.websocket.log('Emit appState', getAppState());
-    // io.emit('appState', getAppState())
+  player.stop().then(() => {
+    if (req.body.item) {
+      playlist.replace(req.body.item);
+    }
+    player.start(playlist);
     res.json(getAppState())
   });
-});
-
-app.post('/start', (req, res) => {
-  player.restart().then(() => res.json(getAppState()));
 });
 
 app.post('/stop', (req, res) => {

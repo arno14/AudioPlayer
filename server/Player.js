@@ -11,61 +11,52 @@ const fs = require('fs');
 
 class Player {
 
-  constructor(playlist, logger) {
-    this.playlist = playlist;
+  constructor(logger) {
     this.logger = logger;
     this.audio = null;
     this.isPlaying = false;
-    this.isKilled = false;
-    this.onMusicPlay = ()=>{};
+    this.isStopped = false;
+    this.onMusicPlay = () => { };
+    this.onMusicStop = () => { };
   }
 
-  restart() {
-    this.logger.log('restart()');
-    return this.stop()
-      .then(() => {
-        this.logger.log('restart() after stop()')
-        this.start();
-        return true;
-      })
-  }
-
-  start() {
-    this.logger.log('start()');
-    return this.play()
-      .then((evt) => {
-        if(evt.isKilled){
-          this.logger.log('start() post play reading is stopped');
-          return;
-        }
-        let next = this.playlist.next();
-        this.logger.log('start() read next ', next);
-        if (next) {
-          this.start();
-        }
-      });
-  }
-
-  play() {
-    this.onMusicPlay();
-    let currentFileName = this.playlist.currentFileName();
-    this.logger.log('play(', currentFileName, ')');
-    if (!currentFileName) {
-      return new Promise((resolve, reject) => reject());
+  start(playlist){
+    let filename = playlist.currentFileName();
+    if(!filename){
+      return new Promise((resolve) => { resolve() });
     }
+    this.play(filename).then((res)=>{
+      if(res.isStopped){
+        return;
+      }
+      let next = playlist.next();
+      if(!next){
+        return;
+      }
+      this.logger.log('start next item in playlist')
+      this.start(playlist);    
+    })
+  }
+  play(filename) {
+    if (this.isPlaying) {
+      return this.stop().then(() => {
+        return this.play(filename);
+      })
+    }
+    this.logger.log('play(', filename, ')');
     this.promise = new Promise((resolve, reject) => {
       this.isPlaying = true;
-      this.isKilled = false;
-      this.audio = playsound.play(currentFileName, (err) => {
-        let isKilled = this.isKilled;
-        this.logger.log('endplay(', currentFileName, err, isKilled, ')');
+      this.isStopped = false;
+      this.audio = playsound.play(filename, (err) => {
+        let resolution = {
+          filename: filename,
+          isStopped: this.isStopped
+        };
+        this.logger.log('endplay(', filename, ')', ((this.isStopped)?'stopped':''));
         this.isPlaying = false;
-        this.isKilled = false;
-        this.promise = null;
-        resolve({
-          isKilled: isKilled,
-          filename:currentFileName
-        })
+        this.isStopped = false;
+        this.onMusicStop();
+        resolve(resolution);
       })
       this.onMusicPlay();
     });
@@ -73,14 +64,13 @@ class Player {
   }
 
   stop() {
-    this.logger.log('stop()');
+    if (!this.isPlaying) {
+      return new Promise((resolve) => { resolve() });
+    }
     if (this.audio) {
       this.logger.log('kill process');
-      this.isKilled = true;
+      this.isStopped = true;
       this.audio.kill();
-    }
-    if (!this.promise) {
-      return new Promise(resolve => resolve());
     }
     return this.promise;
   }
