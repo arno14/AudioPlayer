@@ -22,7 +22,7 @@
         </v-btn>
       </v-toolbar-items>
     </v-app-bar>
-    <span class="spacer"></span>
+    <!-- <span class="spacer"></span> -->
     <div class="content">
       <router-view
         v-bind:currentDir="currentDir"
