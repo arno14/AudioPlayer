@@ -30,6 +30,7 @@ class Finder {
       list: [],
       parent: null
     };
+
     if (directory) {
       const exploded = directory.split('/');
       exploded.pop();
@@ -46,7 +47,7 @@ class Finder {
       const i = {
         name: item.name,
         type: item.isDirectory() ? 'dir' : 'file',
-        path
+        path: directory
       };
       if (i.type === 'file') {
         if (!i.name.match(/.mp3|.wav/i)) {
