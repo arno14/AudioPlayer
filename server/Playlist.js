@@ -67,6 +67,7 @@ class Playlist {
     const existingIndex = this.find(item);
     if (existingIndex >= 0) {
       this.list.splice(existingIndex, 1);
+      this.currentIndex -= 1;
     } else {
       this.logger.warn('remove(), not found', existingIndex);
     }
@@ -77,12 +78,11 @@ class Playlist {
   replace(item) {
     const existingIndex = this.find(item);
     this.logger.log('replace(', item, existingIndex, ')');
-    if (existingIndex >= 0) {
+    if (existingIndex !== null) {
+      this.logger.log('already in list change index');
       this.currentIndex = existingIndex;
-    } else if (this.currentIndex !== null) {
-      this.list.splice(this.currentIndex + 1, 0, item);
-      this.list.currentIndex = this.currentIndex + 1;
     } else {
+      this.logger.log('push in the list');
       this.list.push(item);
       this.currentIndex = this.list.length - 1;
     }
