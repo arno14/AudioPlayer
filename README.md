@@ -1,3 +1,9 @@
+A Very Basic Audio player.
+
+Music is played on the server, from file hosted on the server.
+
+Control is in a vue.js app
+
 
 @todo
 - OK / compteur de morceaux dans la playlist
