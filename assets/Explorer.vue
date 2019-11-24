@@ -25,7 +25,7 @@
 
 <script>
 export default {
-  name: "Explorer",
-  props: ["currentDir"]
+  name: 'Explorer',
+  props: ['currentDir'],
 };
 </script>

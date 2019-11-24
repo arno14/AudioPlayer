@@ -10,8 +10,8 @@
       </v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-items>
-        <!-- <router-link :to="{name: 'playlist', query:$route.query}" replace>GO to Playlist</router-link> -->
-        <v-btn icon title="Playlist" :to="{name: 'playlist', query:$route.query}">
+        <v-btn icon title="Playlist"
+          :to="{name: 'playlist', query:$route.query}">
           <v-badge>
             <template v-if="playlistCount" v-slot:badge>{{playlistCount}}</template>
             <v-icon>fa fa-list</v-icon>
@@ -42,20 +42,21 @@
 </template>
 
 <script>
-const axios = require("axios");
+import io from 'socket.io-client';
 
-import io from "socket.io-client";
-var socket = io.connect(); //localhost:8015
+const axios = require('axios');
 
-const playerpath = "/";
+const socket = io.connect(); // localhost:8015
+
+const playerpath = '/';
 export default {
-  name: "App",
+  name: 'App',
   data() {
     return {
       isPlaying: false,
       playlist: null,
       currentDir: {},
-      countLoading: 0
+      countLoading: 0,
     };
   },
   computed: {
@@ -70,24 +71,24 @@ export default {
         return this.playlist.list.length;
       }
       return 0;
-    }
+    },
   },
   mounted() {
-    this.countLoading++;
-    axios.get(playerpath + "app-state").then(resp => {
+    this.countLoading += 1;
+    axios.get(`${playerpath}app-state`).then((resp) => {
       this.applyResponse(resp);
       if (this.playlistCount) {
         return;
       }
-      if (this.$route.name !== "explorer") {
-        console.log("redirect to explorer, no playlist");
-        this.$router.replace({ name: "explorer", query: this.$route.query });
+      if (this.$route.name !== 'explorer') {
+        // console.log('redirect to explorer, no playlist');
+        this.$router.replace({ name: 'explorer', query: this.$route.query });
       }
     });
     this.list(this.$route.query.pathname);
-    socket.on("connect", data => {
+    socket.on('connect', () => {
       // console.log('on connect');
-      socket.on("appState", data => {
+      socket.on('appState', (data) => {
         // console.log("websocket, appState", data );
         this.applyResponse({ data });
       });
@@ -95,35 +96,35 @@ export default {
   },
   methods: {
     play(i) {
-      axios.post(playerpath + "play", { item: i }).then(this.applyResponse);
+      axios.post(`${playerpath}play`, { item: i }).then(this.applyResponse);
     },
     stop() {
-      axios.post(playerpath + "stop").then(this.applyResponse);
+      axios.post(`${playerpath}stop`).then(this.applyResponse);
     },
     // pause() {
     //   axios.post(playerpath + "pause").then(this.applyResponse);
     // },
     playlistAdd(i) {
       axios
-        .post(playerpath + "playlist/add", { item: i })
+        .post(`${playerpath}playlist/add`, { item: i })
         .then(this.applyResponse);
     },
     playlistRemove(i) {
       axios
-        .post(playerpath + "playlist/remove", { item: i })
+        .post(`${playerpath}playlist/remove`, { item: i })
         .then(this.applyResponse);
     },
     playlistClear() {
-      axios.post(playerpath + "playlist/clear").then(this.applyResponse);
+      axios.post(`${playerpath}playlist/clear`).then(this.applyResponse);
     },
     list(i = null) {
       // console.log("list ", i, this.$route.query);
       let pathname = null;
-      if (typeof i === "string") {
+      if (typeof i === 'string') {
         pathname = i;
       } else if (i) {
         pathname = i.path;
-        pathname += i.path && i.name ? "/" : "";
+        pathname += i.path && i.name ? '/' : '';
         pathname += i.name;
       }
       if (this.$route.query.pathname !== pathname) {
@@ -131,19 +132,19 @@ export default {
         this.$router.replace({ query: { pathname } });
       }
 
-      this.countLoading++;
-      axios.get(playerpath + "list", { params: { pathname } }).then(resp => {
+      this.countLoading += 1;
+      axios.get(`${playerpath}list`, { params: { pathname } }).then((resp) => {
         // console.log("post list ", i, this.$route.query)
-        this.countLoading--;
+        this.countLoading -= 1;
         this.currentDir = resp.data;
       });
     },
     applyResponse(resp) {
-      this.countLoading--;
+      this.countLoading -= 1;
       this.isPlaying = resp.data.isPlaying;
       this.playlist = resp.data.playlist;
-    }
-  }
+    },
+  },
 };
 </script>
 

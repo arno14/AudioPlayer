@@ -1,13 +1,10 @@
 require('dotenv').config();
+
 const PORT = process.env.SERVER_PORT;
 const DATADIR = process.env.DATA_PATH;
 const SAVEPATH = process.env.SAVE_PATH;
 
 const express = require('express');
-const Player = require('./Player.js');
-const PlayList = require('./Playlist.js');
-const Finder = require('./Finder.js');
-const Logger = require('./Logger.js');
 const fs = require('fs');
 
 const app = express();
@@ -18,16 +15,21 @@ app.use(express.json());
 app.use(express.static('public'));
 
 
+const Player = require('./Player.js');
+const PlayList = require('./Playlist.js');
+const Finder = require('./Finder.js');
+const Logger = require('./Logger.js');
+
 const loggers = {
-  'finder': new Logger('finder'),
-  'playlist': new Logger('playlist'),
-  'player': new Logger('player'),
-  'websocket': new Logger('websocket'),
+  finder: new Logger('finder'),
+  playlist: new Logger('playlist', true),
+  player: new Logger('player'),
+  websocket: new Logger('websocket'),
   controller: new Logger('controller'),
 };
 
-io.on('connection', function (client) {
-  loggers.websocket.log('connection');
+io.on('connection', (client) => {
+  loggers.websocket.log('connection', client);
 });
 
 // let counter = 0,
@@ -48,22 +50,22 @@ function getAppState() {
     playlist: {
       list: playlist.list,
       currentIndex: playlist.currentIndex,
-      current: playlist.current()
+      current: playlist.current(),
     },
-  }
+  };
 }
 
 player.onMusicPlay = () => {
   loggers.websocket.log('onMusicPlay, emit appState');
   io.emit('appState', getAppState());
-}
+};
 player.onMusicStop = () => {
   loggers.websocket.log('onMusicStop, emit appState');
   io.emit('appState', getAppState());
-}
+};
 
 app.get('/', (req, res) => {
-  fs.readFile(__dirname + '/index.html', 'utf8', (err, html) => {
+  fs.readFile(`${__dirname}/index.html`, 'utf8', (err, html) => {
     res.send(html);
   });
 });
@@ -77,12 +79,12 @@ app.get('/list', (req, res) => {
 });
 
 app.post('/playlist/add', (req, res) => {
-  let item = req.body.item;
+  const { item } = req.body;
   playlist.push(item).finally(() => res.json(getAppState()));
 });
 
 app.post('/playlist/remove', (req, res) => {
-  let item = req.body.item;
+  const { item } = req.body;
   playlist.remove(item).finally(() => res.json(getAppState()));
 });
 
@@ -97,7 +99,7 @@ app.post('/play', (req, res) => {
       playlist.replace(req.body.item);
     }
     player.start(playlist);
-    res.json(getAppState())
+    res.json(getAppState());
   });
 });
 
@@ -112,5 +114,5 @@ app.use((req, res /* , next */) => {
 });
 
 server.listen(PORT, () => {
-  console.log(` ### Example app is listening on port ${PORT}`);
+  loggers.controller.log(` ### Example app is listening on port ${PORT}`);
 });
