@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-app-bar fixed>
-      <v-toolbar-title>{{filename}}</v-toolbar-title>
+      <v-toolbar-title>{{ filename }}</v-toolbar-title>
       <v-btn icon @click="stop()" v-if="isPlaying && filename" title="Play">
         <v-icon>fa fa-stop</v-icon>
       </v-btn>
@@ -10,14 +10,23 @@
       </v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-items>
-        <v-btn icon title="Playlist"
-          :to="{name: 'playlist', query:$route.query}">
+        <v-btn
+          icon
+          title="Playlist"
+          :to="{ name: 'playlist', query: $route.query }"
+        >
           <v-badge>
-            <template v-if="playlistCount" v-slot:badge>{{playlistCount}}</template>
+            <template v-if="playlistCount" v-slot:badge>{{
+              playlistCount
+            }}</template>
             <v-icon>fa fa-list</v-icon>
           </v-badge>
         </v-btn>
-        <v-btn icon title="Explorer" :to="{name:'explorer', query: $route.query}">
+        <v-btn
+          icon
+          title="Explorer"
+          :to="{ name: 'explorer', query: $route.query }"
+        >
           <v-icon>fa fa-folder-open</v-icon>
         </v-btn>
       </v-toolbar-items>
@@ -25,7 +34,11 @@
     <!-- <span class="spacer"></span> -->
     <div class="content">
       <div>
-        <v-text-field color="success" v-bind:loading="countLoading>0" disabled></v-text-field>
+        <v-text-field
+          color="success"
+          v-bind:loading="countLoading > 0"
+          disabled
+        ></v-text-field>
       </div>
       <router-view
         v-bind:currentDir="currentDir"
@@ -56,7 +69,7 @@ export default {
       isPlaying: false,
       playlist: null,
       currentDir: {},
-      countLoading: 0,
+      countLoading: 0
     };
   },
   computed: {
@@ -71,11 +84,11 @@ export default {
         return this.playlist.list.length;
       }
       return 0;
-    },
+    }
   },
   mounted() {
     this.countLoading += 1;
-    axios.get(`${playerpath}app-state`).then((resp) => {
+    axios.get(`${playerpath}app-state`).then(resp => {
       this.applyResponse(resp);
       if (this.playlistCount) {
         return;
@@ -88,7 +101,7 @@ export default {
     this.list(this.$route.query.pathname);
     socket.on('connect', () => {
       // console.log('on connect');
-      socket.on('appState', (data) => {
+      socket.on('appState', data => {
         // console.log("websocket, appState", data );
         this.applyResponse({ data });
       });
@@ -133,7 +146,7 @@ export default {
       }
 
       this.countLoading += 1;
-      axios.get(`${playerpath}list`, { params: { pathname } }).then((resp) => {
+      axios.get(`${playerpath}list`, { params: { pathname } }).then(resp => {
         // console.log("post list ", i, this.$route.query)
         this.countLoading -= 1;
         this.currentDir = resp.data;
@@ -143,8 +156,8 @@ export default {
       this.countLoading -= 1;
       this.isPlaying = resp.data.isPlaying;
       this.playlist = resp.data.playlist;
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -161,18 +174,5 @@ export default {
 }
 .content {
   margin-top: 1.5em;
-}
-.playlist-counter {
-  font-weight: bold;
-  background-color: crimson;
-  color: black;
-  display: inline-block;
-  padding: 0.4em;
-  border-radius: 50%;
-  width: 2em;
-  height: 2em;
-}
-a {
-  color: #42b983;
 }
 </style>

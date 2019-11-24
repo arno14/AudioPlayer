@@ -71,7 +71,7 @@ class Playlist {
       this.logger.warn('remove(), not found', existingIndex);
     }
     this.save();
-    return new Promise((resolve) => resolve());
+    return new Promise(resolve => resolve());
   }
 
   replace(item) {
@@ -93,16 +93,17 @@ class Playlist {
     this.logger.log('push(', item, ')');
     const existingIndex = this.find(item);
     if (existingIndex !== null) {
-      return new Promise((resolve) => resolve());
-    } if (item.type === 'file') {
+      return new Promise(resolve => resolve());
+    }
+    if (item.type === 'file') {
       this.list.push(item);
       this.save();
-      return new Promise((resolve) => resolve());
+      return new Promise(resolve => resolve());
     }
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const dirPath = item.path.split('/').concat(item.name);
-      this.finder.getContent(dirPath.join('/')).then((r) => {
-        r.list.forEach((i) => {
+      this.finder.getContent(dirPath.join('/')).then(r => {
+        r.list.forEach(i => {
           if (i.type === 'file') {
             this.push(i);
           }
@@ -119,14 +120,17 @@ class Playlist {
   }
 
   save() {
-    const content = JSON.stringify({
-      list: this.list,
-      currentIndex: this.currentIndex,
-    }, null, '\t');
+    const content = JSON.stringify(
+      {
+        list: this.list,
+        currentIndex: this.currentIndex
+      },
+      null,
+      '\t'
+    );
 
     fs.writeFileSync(this.savePath, content, { flag: 'w' });
   }
 }
-
 
 module.exports = Playlist;

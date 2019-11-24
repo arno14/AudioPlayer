@@ -5,6 +5,7 @@ Music is played on the server, from file hosted on the server.
 Control is in a vue.js app
 
 Requirments:
+
 - node.js
 - an audio driver for play-sound as mplayer (apt-get install mplayer)
 
@@ -26,8 +27,10 @@ npm run server
 
 ```
 
+node_modules/.bin/eslint assets/\*.vue --fix
 
 @todo
+
 - OK / compteur de morceaux dans la playlist
 - OK / filtrer les fichiers non audio
 - OK / websocket rafraichissement liste en cours
@@ -35,7 +38,7 @@ npm run server
 - Explorateur: moteur de recherche
 - spinner au chargement du contenu de l'explorateur
 - control volume
-- fonction pause 
+- fonction pause
 - select item from Explorateur to add in playlist
 - select item from playlist to remove from playlist (drop button trash general)
 - Explorateur: afficher si morceau en playlist ou en cours de lecture

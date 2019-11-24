@@ -14,7 +14,6 @@ const io = require('socket.io')(server);
 app.use(express.json());
 app.use(express.static('public'));
 
-
 const Player = require('./Player.js');
 const PlayList = require('./Playlist.js');
 const Finder = require('./Finder.js');
@@ -25,10 +24,10 @@ const loggers = {
   playlist: new Logger('playlist', true),
   player: new Logger('player'),
   websocket: new Logger('websocket'),
-  controller: new Logger('controller'),
+  controller: new Logger('controller')
 };
 
-io.on('connection', (client) => {
+io.on('connection', client => {
   loggers.websocket.log('connection', client);
 });
 
@@ -50,8 +49,8 @@ function getAppState() {
     playlist: {
       list: playlist.list,
       currentIndex: playlist.currentIndex,
-      current: playlist.current(),
-    },
+      current: playlist.current()
+    }
   };
 }
 
@@ -75,7 +74,7 @@ app.get('/app-state', (req, res) => {
 });
 
 app.get('/list', (req, res) => {
-  finder.getContent(req.query.pathname).then((f) => res.json(f));
+  finder.getContent(req.query.pathname).then(f => res.json(f));
 });
 
 app.post('/playlist/add', (req, res) => {

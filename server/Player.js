@@ -1,10 +1,8 @@
-
-const playsound = require('play-sound')(
-  // opts = {
-  // players:['mplayer','afplay', 'mpg123','mpg321','play','omxplayer', 'aplay','cmdmp3'],
-  // player:'aplay'
-  // }
-);
+const playsound = require('play-sound')();
+// opts = {
+// players:['mplayer','afplay', 'mpg123','mpg321','play','omxplayer', 'aplay','cmdmp3'],
+// player:'aplay'
+// }
 
 class Player {
   constructor(logger) {
@@ -12,13 +10,13 @@ class Player {
     this.audio = null;
     this.isPlaying = false;
     this.isStopped = false;
-    this.onMusicPlay = () => { };
-    this.onMusicStop = () => { };
+    this.onMusicPlay = () => {};
+    this.onMusicStop = () => {};
   }
 
   start(playlist) {
     const filename = playlist.currentFileName();
-    this.play(filename).then((res) => {
+    this.play(filename).then(res => {
       if (res.isStopped) {
         return;
       }
@@ -36,15 +34,21 @@ class Player {
       return this.stop().then(() => this.play(filename));
     }
     this.logger.log('play(', filename, ')');
-    this.promise = new Promise((resolve) => {
+    this.promise = new Promise(resolve => {
       this.isPlaying = true;
       this.isStopped = false;
-      this.audio = playsound.play(filename, (err) => {
+      this.audio = playsound.play(filename, err => {
         const resolution = {
           filename,
-          isStopped: this.isStopped,
+          isStopped: this.isStopped
         };
-        this.logger.log('endplay(', filename, ')', err, ((this.isStopped) ? 'stopped' : ''));
+        this.logger.log(
+          'endplay(',
+          filename,
+          ')',
+          err,
+          this.isStopped ? 'stopped' : ''
+        );
         this.isPlaying = false;
         this.isStopped = false;
         this.onMusicStop();
@@ -57,7 +61,9 @@ class Player {
 
   stop() {
     if (!this.isPlaying) {
-      return new Promise((resolve) => { resolve(); });
+      return new Promise(resolve => {
+        resolve();
+      });
     }
     if (this.audio) {
       this.logger.log('kill process');

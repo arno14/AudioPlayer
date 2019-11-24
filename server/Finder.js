@@ -1,10 +1,9 @@
-
 const path = require('path');
 const fs = require('fs');
 
 const comparator = function compare(a, b) {
   if (a.type !== b.type) {
-    return (a.type === 'dir') ? -1 : 1;
+    return a.type === 'dir' ? -1 : 1;
   }
   if (a.name < b.name) {
     return -1;
@@ -14,7 +13,6 @@ const comparator = function compare(a, b) {
   }
   return 0;
 };
-
 
 class Finder {
   constructor(basePath, logger) {
@@ -30,7 +28,7 @@ class Finder {
       path: directory,
       type: 'dir',
       list: [],
-      parent: null,
+      parent: null
     };
     if (directory) {
       const exploded = directory.split('/');
@@ -38,7 +36,7 @@ class Finder {
       resolution.parent = {
         path: exploded.join('/'),
         type: 'dir',
-        name: '',
+        name: ''
       };
     }
 
@@ -47,8 +45,8 @@ class Finder {
     for await (const item of dir) {
       const i = {
         name: item.name,
-        type: (item.isDirectory()) ? 'dir' : 'file',
-        path,
+        type: item.isDirectory() ? 'dir' : 'file',
+        path
       };
       if (i.type === 'file') {
         if (!i.name.match(/.mp3|.wav/i)) {
@@ -65,13 +63,12 @@ class Finder {
   }
 
   getFileName(item) {
-    const fullFileName = `/${
-      this.basePath
-        .split('/')
-        .concat(item.path.split('/'))
-        .concat([item.name])
-        .filter(Boolean)
-        .join('/')}`;
+    const fullFileName = `/${this.basePath
+      .split('/')
+      .concat(item.path.split('/'))
+      .concat([item.name])
+      .filter(Boolean)
+      .join('/')}`;
 
     if (!fs.existsSync(fullFileName)) {
       this.logger.warn('File ', fullFileName, ' does not exists', item);
@@ -80,6 +77,5 @@ class Finder {
     return fullFileName;
   }
 }
-
 
 module.exports = Finder;

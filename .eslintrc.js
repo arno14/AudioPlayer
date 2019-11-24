@@ -2,23 +2,22 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
-    node: true,
+    node: true
   },
-  extends: [
-    'plugin:vue/essential',
-    'airbnb-base',
-  ],
+  extends: ['plugin:vue/essential', 'airbnb-base'],
   globals: {
     Atomics: 'readonly',
-    SharedArrayBuffer: 'readonly',
+    SharedArrayBuffer: 'readonly'
   },
   parserOptions: {
     ecmaVersion: 2018,
-    sourceType: 'module',
+    sourceType: 'module'
   },
-  plugins: [
-    'vue',
-  ],
+  plugins: ['vue', 'prettier'],
   rules: {
-  },
+    'prettier/prettier': 'error',
+    //conflict with prettier
+    'comma-dangle': 'off',
+    'arrow-parens': 'off'
+  }
 };
