@@ -24,6 +24,9 @@
     </v-app-bar>
     <!-- <span class="spacer"></span> -->
     <div class="content">
+      <div>
+        <v-text-field color="success" v-bind:loading="countLoading>0" disabled></v-text-field>
+      </div>
       <router-view
         v-bind:currentDir="currentDir"
         v-bind:playlist="playlist"
@@ -39,7 +42,6 @@
 </template>
 
 <script>
-
 const axios = require("axios");
 
 import io from "socket.io-client";
@@ -52,7 +54,8 @@ export default {
     return {
       isPlaying: false,
       playlist: null,
-      currentDir: {}
+      currentDir: {},
+      countLoading: 0
     };
   },
   computed: {
@@ -70,6 +73,7 @@ export default {
     }
   },
   mounted() {
+    this.countLoading++;
     axios.get(playerpath + "current-file").then(resp => {
       this.applyResponse(resp);
       if (this.playlistCount) {
@@ -130,12 +134,15 @@ export default {
         this.$router.replace({ query: { pathname } });
       }
 
+      this.countLoading++;
       axios.get(playerpath + "list", { params: { pathname } }).then(resp => {
-        // console.log("post list ", i, this.$route.query);
+        // console.log("post list ", i, this.$route.query)
+        this.countLoading--;
         this.currentDir = resp.data;
       });
     },
     applyResponse(resp) {
+      this.countLoading--;
       this.isPlaying = resp.data.isPlaying;
       this.playlist = resp.data.playlist;
     }
@@ -155,7 +162,7 @@ export default {
   border: 1px dashed black;
 }
 .content {
-  margin-top: 3.5em;
+  margin-top: 1.5em;
 }
 .playlist-counter {
   font-weight: bold;

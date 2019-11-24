@@ -68,7 +68,9 @@ app.get('/list', (req, res) => {
 });
 
 app.get('/current-file', (req, res) => {
-  res.json(getAppState());
+  setTimeout(()=>{
+    res.json(getAppState());
+  },2000); 
 });
 
 app.post('/playlist/add', (req, res) => {
