@@ -4,6 +4,26 @@ Music is played on the server, from file hosted on the server.
 
 Control is in a vue.js app
 
+Requirments:
+- node.js
+- an audio driver for play-sound as mplayer (apt-get install mplayer)
+
+```
+git clone https://github.com/arno14/AudioPlayer.git
+
+npm install
+
+cp .env.dist .env
+
+nano .env
+
+npm run encore
+
+npm run server
+
+
+```
+
 
 @todo
 - OK / compteur de morceaux dans la playlist

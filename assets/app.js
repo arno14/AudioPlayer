@@ -1,8 +1,8 @@
 import Vue from 'vue';
 
-import App from './component/App';
-import Explorer from './component/Explorer.vue';
-import Playlist from './component/Playlist.vue';
+import App from './App';
+import Explorer from './Explorer.vue';
+import Playlist from './Playlist.vue';
 
 import '@fortawesome/fontawesome-free/css/all.css'
 
