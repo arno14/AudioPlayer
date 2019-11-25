@@ -3,8 +3,12 @@
 <template>
   <v-list>
     <v-list-item v-if="currentDir.parent" :title="JSON.stringify(currentDir)">
-      <v-list-item-icon @click="$emit('list', currentDir.parent)">
-        <v-icon v-if="currentDir.parent">fa fa-chevron-left</v-icon>
+      <v-list-item-icon>
+        <v-icon
+          v-if="currentDir.parent"
+          @click="$emit('list', currentDir.parent)"
+          >fa fa-chevron-left</v-icon
+        >
       </v-list-item-icon>
       <v-list-item-content>
         <strong>{{ currentDir.path }}</strong>
