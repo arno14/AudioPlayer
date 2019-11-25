@@ -1,4 +1,6 @@
 const playsound = require('play-sound')();
+const loudness = require('loudness');
+
 // opts = {
 // players:['mplayer','afplay', 'mpg123','mpg321','play','omxplayer', 'aplay','cmdmp3'],
 // player:'aplay'
@@ -12,6 +14,26 @@ class Player {
     this.isStopped = false;
     this.onMusicPlay = () => {};
     this.onMusicStop = () => {};
+    this.volume = null;
+  }
+
+  setVolume(volume) {
+    return loudness
+      .setVolume(volume, (err, vol) => {
+        this.logger.warn('setVolume failed', err, vol);
+      })
+      .then(() => this.getVolume());
+  }
+
+  getVolume() {
+    return loudness
+      .getVolume((err, vol) => {
+        this.logger.warn('getVolume failed', err, vol);
+      })
+      .then(volume => {
+        this.volume = volume;
+        return volume;
+      });
   }
 
   start(playlist) {

@@ -21,7 +21,7 @@ const Logger = require('./Logger.js');
 
 const loggers = {
   finder: new Logger('finder'),
-  playlist: new Logger('playlist', true),
+  playlist: new Logger('playlist'),
   player: new Logger('player'),
   websocket: new Logger('websocket'),
   controller: new Logger('controller')
@@ -45,6 +45,7 @@ const player = new Player(loggers.player);
 
 function getAppState() {
   return {
+    volume: player.volume,
     isPlaying: player.isPlaying,
     playlist: {
       list: playlist.list,
@@ -70,7 +71,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/app-state', (req, res) => {
-  res.json(getAppState());
+  player.getVolume().then(() => res.json(getAppState()));
 });
 
 app.get('/list', (req, res) => {
@@ -100,6 +101,11 @@ app.post('/play', (req, res) => {
     player.start(playlist);
     res.json(getAppState());
   });
+});
+
+app.post('/volume', (req, res) => {
+  const { volume } = req.body;
+  player.setVolume(volume).finally(() => res.json(getAppState()));
 });
 
 app.post('/stop', (req, res) => {

@@ -1,5 +1,14 @@
 <template>
   <v-list v-if="hasPlaylist">
+    <v-list-item :title="'vol=' + volume">
+      <v-slider
+        @change="$emit('volumeChange', requestedVolume)"
+        min="0"
+        max="100"
+        prepend-icon="fa fa-volume-up"
+        v-model="requestedVolume"
+      ></v-slider>
+    </v-list-item>
     <v-list-item
       v-for="(f, k) in playlist.list"
       :key="k"
@@ -32,7 +41,17 @@
 <script>
 export default {
   name: 'Playlist',
-  props: ['playlist', 'isPlaying'],
+  props: ['playlist', 'isPlaying', 'volume'],
+  data() {
+    return {
+      requestedVolume: null
+    };
+  },
+  watch: {
+    volume(newVol) {
+      this.requestedVolume = newVol;
+    }
+  },
   computed: {
     hasPlaylist() {
       return this.playlist ? this.playlist.list.length > 0 : false;
