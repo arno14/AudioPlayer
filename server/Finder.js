@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const find = require('find');
 
-const comparator = function compare(a, b) {
+const itemComparator = (a, b) => {
   if (a.type !== b.type) {
     return a.type === 'dir' ? -1 : 1;
   }
@@ -15,7 +15,7 @@ const comparator = function compare(a, b) {
   return 0;
 };
 
-const audioExtension = /.mp3|.wav/i;
+const audioExtension = /.mp3|.wav|.wma/i;
 
 class Finder {
   constructor(basePath, logger) {
@@ -29,11 +29,20 @@ class Finder {
       path: this.basePath,
       type: 'dir',
       list: [],
-      dirs: [],
-      files: [],
       parent: null
     };
-    // const regexp = /\.mp3$/;
+
+    const pushItem = (type, filename) => {
+      const paths = filename.replace(this.basePath, '').split('/');
+      const item = { type, name: paths[paths.length - 1] };
+      paths.pop();
+      item.path = paths.join('/');
+      if (type === 'file' && !item.name.match(audioExtension)) {
+        return;
+      }
+      resolution.list.push(item);
+    };
+
     const regexp = new RegExp(term, 'i');
     let countResolved = 0;
 
@@ -42,20 +51,13 @@ class Finder {
         if (countResolved !== 2) {
           return;
         }
-        resolution.list = resolution.dirs.concat(resolution.files);
-        delete resolution.dirs;
-        delete resolution.files;
+        resolution.list.sort(itemComparator);
         resolve(resolution);
       };
 
       find.dir(regexp, this.basePath, dirs => {
         dirs.forEach(d => {
-          const item = { type: 'dir' };
-          const paths = d.replace(this.basePath, '').split('/');
-          item.name = paths[paths.length - 1];
-          paths.pop();
-          item.path = paths.join('/');
-          resolution.dirs.push(item);
+          pushItem('dir', d);
         });
         countResolved += 1;
         finalize();
@@ -63,15 +65,7 @@ class Finder {
 
       find.file(regexp, this.basePath, files => {
         files.forEach(f => {
-          const item = { type: 'file' };
-          const paths = f.replace(this.basePath, '').split('/');
-          item.name = paths[paths.length - 1];
-          paths.pop();
-          item.path = paths.join('/');
-
-          if (item.name.match(audioExtension)) {
-            resolution.files.push(item);
-          }
+          pushItem('file', f);
         });
         countResolved += 1;
         finalize();
@@ -117,7 +111,7 @@ class Finder {
       resolution.list.push(i);
     }
 
-    resolution.list.sort(comparator);
+    resolution.list.sort(itemComparator);
 
     return resolution;
   }

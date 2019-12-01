@@ -23,7 +23,7 @@
       </v-list-item-content>
     </v-list-item>
     <v-list-item
-      v-for="i in currentDir.list"
+      v-for="i in reducedList"
       :key="i.path + i.name"
       :title="JSON.stringify(i)"
     >
@@ -46,21 +46,68 @@
         <v-icon @click="$emit('playlistAdd', i)">fa fa-plus</v-icon>
       </v-list-item-action>
     </v-list-item>
+    <v-list-item
+      v-if="!isFullyLoaded"
+      @click="maxCountItem = maxCountItem + 10"
+    >
+      <v-list-item-icon> </v-list-item-icon>
+      <v-list-item-content v-intersect="onIntersect">
+        {{ reducedList.length }}/{{ currentList.length }}
+        <span v-if="!isFullyLoaded"> More </span>
+      </v-list-item-content>
+    </v-list-item>
   </v-list>
 </template>
 
 <script>
+const defaultCountItems = 5;
+
 export default {
   name: 'Explorer',
   props: ['currentDir', 'term'],
   data() {
     return {
-      requestedTerm: this.term
+      requestedTerm: this.term,
+      maxCountItem: defaultCountItems
     };
   },
   computed: {
+    currentList() {
+      if (!this.currentDir) {
+        return [];
+      }
+      if (!this.currentDir.list) {
+        return [];
+      }
+      return this.currentDir.list;
+    },
     isSearchMode() {
       return this.term !== '';
+    },
+    isFullyLoaded() {
+      return this.reducedList.length === this.currentList.length;
+    },
+    reducedList() {
+      return this.currentList.reduce((accumulator, value, index) => {
+        if (index < this.maxCountItem) {
+          accumulator.push(value);
+        }
+        return accumulator;
+      }, []);
+    }
+  },
+  methods: {
+    // lorsque le bouton "More" est visible
+    onIntersect() {
+      if (this.isFullyLoaded) {
+        return;
+      }
+      this.maxCountItem += 20;
+    }
+  },
+  watch: {
+    currentDir() {
+      this.maxCountItem = defaultCountItems;
     }
   }
 };
