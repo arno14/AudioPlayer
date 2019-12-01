@@ -75,7 +75,12 @@ app.get('/app-state', (req, res) => {
 });
 
 app.get('/list', (req, res) => {
-  finder.getContent(req.query.pathname).then(f => res.json(f));
+  const { term, pathname } = req.query;
+  if (term) {
+    finder.filter(term).then(f => res.json(f));
+  } else {
+    finder.getContent(pathname).then(f => res.json(f));
+  }
 });
 
 app.post('/playlist/add', (req, res) => {
