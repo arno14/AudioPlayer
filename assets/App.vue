@@ -45,12 +45,14 @@
         v-bind:playlist="playlist"
         v-bind:isPlaying="isPlaying"
         v-bind:volume="volume"
+        v-bind:term="term"
         @list="list"
         @play="play"
         @stop="stop"
         @playlistAdd="playlistAdd"
         @playlistRemove="playlistRemove"
         @volumeChange="volumeChange"
+        @search="search"
       ></router-view>
     </div>
   </v-app>
@@ -72,7 +74,8 @@ export default {
       playlist: null,
       currentDir: {},
       countLoading: 0,
-      volume: null
+      volume: null,
+      term: null
     };
   },
   computed: {
@@ -135,6 +138,13 @@ export default {
     },
     playlistClear() {
       axios.post(`${playerpath}playlist/clear`).then(this.applyResponse);
+    },
+    search(term) {
+      axios.get(`${playerpath}list`, { params: { term } }).then(resp => {
+        // console.log("post list ", i, this.$route.query)
+        this.countLoading -= 1;
+        this.currentDir = resp.data;
+      });
     },
     list(i = null) {
       // console.log("list ", i, this.$route.query);
