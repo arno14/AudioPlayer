@@ -6,8 +6,8 @@
       <v-text-field
         prepend-icon="fa fa-search"
         placeholder="Search..."
-        @change="$emit('search', term)"
-        v-model="term"
+        @change="$emit('search', requestedTerm)"
+        v-model="requestedTerm"
       ></v-text-field>
     </v-list-item>
     <v-list-item v-if="currentDir.parent" :title="JSON.stringify(currentDir)">
@@ -53,6 +53,11 @@
 export default {
   name: 'Explorer',
   props: ['currentDir', 'term'],
+  data() {
+    return {
+      requestedTerm: this.term
+    };
+  },
   computed: {
     isSearchMode() {
       return this.term !== '';

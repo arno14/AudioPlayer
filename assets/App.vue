@@ -140,6 +140,7 @@ export default {
       axios.post(`${playerpath}playlist/clear`).then(this.applyResponse);
     },
     search(term) {
+      this.term = term;
       axios.get(`${playerpath}list`, { params: { term } }).then(resp => {
         // console.log("post list ", i, this.$route.query)
         this.countLoading -= 1;
