@@ -55,13 +55,23 @@ function getAppState() {
   };
 }
 
+function renderAppState(resp) {
+  return () => {
+    player.getVolume().then(() => resp.json(getAppState()));
+  };
+}
+
 player.onMusicPlay = () => {
   loggers.websocket.log('onMusicPlay, emit appState');
-  io.emit('appState', getAppState());
+  player.getVolume().then(() => {
+    io.emit('appState', getAppState());
+  });
 };
 player.onMusicStop = () => {
   loggers.websocket.log('onMusicStop, emit appState');
-  io.emit('appState', getAppState());
+  player.getVolume().then(() => {
+    io.emit('appState', getAppState());
+  });
 };
 
 app.get('/', (req, res) => {
@@ -71,7 +81,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/app-state', (req, res) => {
-  player.getVolume().then(() => res.json(getAppState()));
+  player.getVolume().then(renderAppState(res));
 });
 
 app.get('/list', (req, res) => {
@@ -85,17 +95,17 @@ app.get('/list', (req, res) => {
 
 app.post('/playlist/add', (req, res) => {
   const { item } = req.body;
-  playlist.push(item).finally(() => res.json(getAppState()));
+  playlist.push(item).finally(renderAppState(res));
 });
 
 app.post('/playlist/remove', (req, res) => {
   const { item } = req.body;
-  playlist.remove(item).finally(() => res.json(getAppState()));
+  playlist.remove(item).finally(renderAppState(res));
 });
 
 app.post('/playlist/clear', (req, res) => {
   playlist.clear();
-  player.stop().finally(() => res.json(getAppState()));
+  player.stop().finally(renderAppState(res));
 });
 
 app.post('/play', (req, res) => {
@@ -110,11 +120,11 @@ app.post('/play', (req, res) => {
 
 app.post('/volume', (req, res) => {
   const { volume } = req.body;
-  player.setVolume(volume).finally(() => res.json(getAppState()));
+  player.setVolume(volume).finally(renderAppState(res));
 });
 
 app.post('/stop', (req, res) => {
-  player.stop().then(() => res.json(getAppState()));
+  player.stop().then(renderAppState(res));
 });
 
 // route non trouvé

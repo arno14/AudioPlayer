@@ -63,7 +63,10 @@ import io from 'socket.io-client';
 
 const axios = require('axios');
 
-const socket = io.connect(); // localhost:8015
+const socket = io({
+  transports: ['websocket']
+}).connect();
+// const socket = io.connect(); // localhost:8015
 
 const playerpath = '/';
 export default {
@@ -96,19 +99,20 @@ export default {
     this.countLoading += 1;
     axios.get(`${playerpath}app-state`).then(resp => {
       this.applyResponse(resp);
-      if (this.playlistCount) {
-        return;
-      }
-      if (this.$route.name !== 'explorer') {
-        // console.log('redirect to explorer, no playlist');
+      if (!this.playlistCount && this.$route.name !== 'explorer') {
+        //redirect to Explorer if playlist is empty
         this.$router.replace({ name: 'explorer', query: this.$route.query });
       }
     });
-    this.list(this.$route.query.pathname);
+
+    if (this.$route.query.term) {
+      this.search(this.$route.query.term);
+    } else {
+      this.list(this.$route.query.pathname);
+    }
+
     socket.on('connect', () => {
-      // console.log('on connect');
       socket.on('appState', data => {
-        // console.log("websocket, appState", data );
         this.applyResponse({ data });
       });
     });
@@ -142,6 +146,10 @@ export default {
     search(term) {
       this.term = term;
       this.countLoading += 1;
+      if (this.$route.query.term !== term) {
+        // console.log("router replace pathname", pathname);
+        this.$router.replace({ query: { term } });
+      }
       axios.get(`${playerpath}list`, { params: { term } }).then(resp => {
         // console.log("post list ", i, this.$route.query)
         this.countLoading -= 1;
@@ -154,9 +162,11 @@ export default {
       if (typeof i === 'string') {
         pathname = i;
       } else if (i) {
-        pathname = i.path;
-        pathname += i.path && i.name ? '/' : '';
-        pathname += i.name;
+        pathname = i.path
+          .split('/')
+          .concat([i.name])
+          .filter(Boolean)
+          .join('/');
       }
       if (this.$route.query.pathname !== pathname) {
         // console.log("router replace pathname", pathname);

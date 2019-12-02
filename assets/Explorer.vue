@@ -51,16 +51,16 @@
       @click="maxCountItem = maxCountItem + 10"
     >
       <v-list-item-icon> </v-list-item-icon>
-      <v-list-item-content v-intersect="onIntersect">
+      <v-list-item-content v-intersect="onButtonMoreIsVisible">
         {{ reducedList.length }}/{{ currentList.length }}
-        <span v-if="!isFullyLoaded"> More </span>
+        <span> More </span>
       </v-list-item-content>
     </v-list-item>
   </v-list>
 </template>
 
 <script>
-const defaultCountItems = 5;
+const COUNT_ITEM_STEP = 10;
 
 export default {
   name: 'Explorer',
@@ -68,7 +68,7 @@ export default {
   data() {
     return {
       requestedTerm: this.term,
-      maxCountItem: defaultCountItems
+      maxCountItems: COUNT_ITEM_STEP //nbre d'item à afficher
     };
   },
   computed: {
@@ -89,7 +89,7 @@ export default {
     },
     reducedList() {
       return this.currentList.reduce((accumulator, value, index) => {
-        if (index < this.maxCountItem) {
+        if (index < this.maxCountItems) {
           accumulator.push(value);
         }
         return accumulator;
@@ -97,17 +97,19 @@ export default {
     }
   },
   methods: {
-    // lorsque le bouton "More" est visible
-    onIntersect() {
+    onButtonMoreIsVisible() {
       if (this.isFullyLoaded) {
         return;
       }
-      this.maxCountItem += 20;
+      this.maxCountItems += COUNT_ITEM_STEP;
     }
   },
   watch: {
     currentDir() {
-      this.maxCountItem = defaultCountItems;
+      this.maxCountItems = COUNT_ITEM_STEP;
+    },
+    term() {
+      this.requestedTerm = this.term;
     }
   }
 };

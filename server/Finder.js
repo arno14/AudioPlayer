@@ -121,7 +121,7 @@ class Finder {
       .split('/')
       .concat(item.path.split('/'))
       .concat([item.name])
-      .filter(Boolean)
+      .filter(Boolean) // remove empty string
       .join('/')}`;
 
     if (!fs.existsSync(fullFileName)) {
