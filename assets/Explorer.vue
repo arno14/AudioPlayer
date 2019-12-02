@@ -39,10 +39,7 @@
           <v-icon @click="$emit('playlistAdd', i)">fa fa-plus</v-icon>
         </v-list-item-action>
       </v-list-item>
-      <v-list-item
-        v-if="!isFullyLoaded"
-        @click="maxCountItem = maxCountItem + 10"
-      >
+      <v-list-item v-if="!isFullyLoaded" @click="onButtonMoreIsVisible()">
         <v-list-item-icon> </v-list-item-icon>
         <v-list-item-content v-intersect="onButtonMoreIsVisible">
           {{ reducedList.length }}/{{ currentList.length }}
@@ -51,13 +48,16 @@
       </v-list-item>
     </v-list>
     <v-app-bar fixed bottom dark>
-      <v-text-field
-        :title="'Search for=' + term"
-        prepend-icon="fa fa-search"
-        placeholder="Search..."
-        @change="$emit('search', requestedTerm)"
-        v-model="requestedTerm"
-      ></v-text-field>
+      <v-container fill-height>
+        <v-text-field
+          :title="'Search for=' + term"
+          prepend-icon="fa fa-search"
+          placeholder="Search..."
+          @change="$emit('search', requestedTerm)"
+          v-model="requestedTerm"
+          v-bind:loading="countLoading > 0"
+        ></v-text-field>
+      </v-container>
     </v-app-bar>
   </div>
 </template>

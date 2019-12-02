@@ -33,13 +33,6 @@
     </v-app-bar>
     <!-- <span class="spacer"></span> -->
     <div class="content">
-      <div>
-        <v-text-field
-          color="success"
-          v-bind:loading="countLoading > 0"
-          disabled
-        ></v-text-field>
-      </div>
       <router-view
         v-bind:currentDir="currentDir"
         v-bind:playlist="playlist"
@@ -203,7 +196,7 @@ export default {
   border: 1px dashed black;
 }
 .content {
-  margin-top: 1.5em;
+  margin-top: 3.5em;
   margin-bottom: 3.5em;
 }
 </style>

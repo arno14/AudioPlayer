@@ -38,13 +38,15 @@
           fa fa-arrow-circle-left
         </v-icon>
       </v-btn>
-      <v-slider
-        @change="$emit('volumeChange', requestedVolume)"
-        min="0"
-        max="100"
-        prepend-icon="fa fa-volume-up"
-        v-model="requestedVolume"
-      ></v-slider>
+      <v-container fill-height>
+        <v-slider
+          @change="$emit('volumeChange', requestedVolume)"
+          min="0"
+          max="100"
+          prepend-icon="fa fa-volume-up"
+          v-model="requestedVolume"
+        ></v-slider>
+      </v-container>
       <v-btn icon>
         <v-icon title="Next" :disabled="hasNext" @click="playNext()">
           fa fa-arrow-circle-right
