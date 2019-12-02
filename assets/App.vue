@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar fixed>
+    <v-app-bar fixed dark>
       <v-toolbar-title>{{ filename }}</v-toolbar-title>
       <v-btn icon @click="stop()" v-if="isPlaying && filename" title="Play">
         <v-icon>fa fa-stop</v-icon>
@@ -46,6 +46,7 @@
         v-bind:isPlaying="isPlaying"
         v-bind:volume="volume"
         v-bind:term="term"
+        v-bind:countLoading="countLoading"
         @list="list"
         @play="play"
         @stop="stop"

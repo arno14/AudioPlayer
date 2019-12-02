@@ -1,53 +1,57 @@
 <template>
-  <v-list v-if="hasPlaylist">
-    <v-list-item :title="'vol=' + volume">
-      <v-list-item-icon title="Previous">
-        <v-icon :disabled="hasPrevious" @click="playPrevious()">
+  <div>
+    <v-list v-if="hasPlaylist">
+      <v-list-item
+        v-for="(f, k) in playlist.list"
+        :key="k"
+        :class="{ active_playing: k == playlist.currentIndex }"
+        :title="JSON.stringify(f)"
+      >
+        <v-list-item-icon>
+          <v-icon
+            v-if="k != playlist.currentIndex || !isPlaying"
+            @click="$emit('play', f)"
+            >fa fa-play</v-icon
+          >
+          <v-icon
+            v-if="k == playlist.currentIndex && isPlaying"
+            @click="$emit('stop')"
+            >fa fa-stop</v-icon
+          >
+        </v-list-item-icon>
+        <v-list-item-content>
+          <v-list-item-subtitle v-text="f.path"></v-list-item-subtitle>
+          <v-list-item-title v-text="f.name"></v-list-item-title>
+        </v-list-item-content>
+        <v-list-item-action>
+          <v-icon @click="$emit('playlistRemove', f)">fa fa-minus</v-icon>
+        </v-list-item-action>
+      </v-list-item>
+    </v-list>
+    <v-app-bar fixed bottom dark v-if="hasPlaylist">
+      <v-btn icon>
+        <v-icon
+          title="Previous"
+          :disabled="hasPrevious"
+          @click="playPrevious()"
+        >
           fa fa-arrow-circle-left
         </v-icon>
-      </v-list-item-icon>
-      <v-list-item-content>
-        <v-slider
-          @change="$emit('volumeChange', requestedVolume)"
-          min="0"
-          max="100"
-          prepend-icon="fa fa-volume-up"
-          v-model="requestedVolume"
-        ></v-slider>
-      </v-list-item-content>
-      <v-list-item-icon title="Next">
-        <v-icon :disabled="hasNext" @click="playNext()">
+      </v-btn>
+      <v-slider
+        @change="$emit('volumeChange', requestedVolume)"
+        min="0"
+        max="100"
+        prepend-icon="fa fa-volume-up"
+        v-model="requestedVolume"
+      ></v-slider>
+      <v-btn icon>
+        <v-icon title="Next" :disabled="hasNext" @click="playNext()">
           fa fa-arrow-circle-right
         </v-icon>
-      </v-list-item-icon>
-    </v-list-item>
-    <v-list-item
-      v-for="(f, k) in playlist.list"
-      :key="k"
-      :class="{ active_playing: k == playlist.currentIndex }"
-      :title="JSON.stringify(f)"
-    >
-      <v-list-item-icon>
-        <v-icon
-          v-if="k != playlist.currentIndex || !isPlaying"
-          @click="$emit('play', f)"
-          >fa fa-play</v-icon
-        >
-        <v-icon
-          v-if="k == playlist.currentIndex && isPlaying"
-          @click="$emit('stop')"
-          >fa fa-stop</v-icon
-        >
-      </v-list-item-icon>
-      <v-list-item-content>
-        <v-list-item-subtitle v-text="f.path"></v-list-item-subtitle>
-        <v-list-item-title v-text="f.name"></v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-action>
-        <v-icon @click="$emit('playlistRemove', f)">fa fa-minus</v-icon>
-      </v-list-item-action>
-    </v-list-item>
-  </v-list>
+      </v-btn>
+    </v-app-bar>
+  </div>
 </template>
 
 <script>
