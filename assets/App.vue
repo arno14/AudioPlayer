@@ -204,5 +204,6 @@ export default {
 }
 .content {
   margin-top: 1.5em;
+  margin-bottom: 3.5em;
 }
 </style>
