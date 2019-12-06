@@ -3,6 +3,7 @@
 <template>
   <div>
     <v-list>
+      <!-- current directory -->
       <v-list-item v-if="currentDir.parent" :title="JSON.stringify(currentDir)">
         <v-list-item-icon>
           <v-icon
@@ -14,7 +15,11 @@
         <v-list-item-content>
           <strong>{{ currentDir.path }}</strong>
         </v-list-item-content>
+        <v-list-item-action>
+          <v-icon @click="$emit('playlistAdd', currentDir)">fa fa-plus</v-icon>
+        </v-list-item-action>
       </v-list-item>
+      <!-- list of items -->
       <v-list-item
         v-for="i in reducedList"
         :key="i.path + i.name"
@@ -39,6 +44,7 @@
           <v-icon @click="$emit('playlistAdd', i)">fa fa-plus</v-icon>
         </v-list-item-action>
       </v-list-item>
+      <!-- button "More" -->
       <v-list-item v-if="!isFullyLoaded" @click="onButtonMoreIsVisible()">
         <v-list-item-icon> </v-list-item-icon>
         <v-list-item-content v-intersect="onButtonMoreIsVisible">
