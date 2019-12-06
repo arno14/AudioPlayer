@@ -113,8 +113,7 @@ app.post('/play', (req, res) => {
     if (req.body.item) {
       playlist.replace(req.body.item);
     }
-    player.start(playlist);
-    res.json(getAppState());
+    player.start(playlist).finally(renderAppState(res));
   });
 });
 

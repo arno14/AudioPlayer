@@ -65,6 +65,9 @@ export default {
       requestedVolume: null
     };
   },
+  mounted() {
+    this.requestedVolume = this.volume;
+  },
   watch: {
     volume(newVol) {
       this.requestedVolume = newVol;

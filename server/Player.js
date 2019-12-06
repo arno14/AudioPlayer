@@ -49,6 +49,8 @@ class Player {
       this.logger.log('start next item in playlist');
       this.start(playlist);
     });
+
+    return this.getVolume();
   }
 
   play(filename) {
