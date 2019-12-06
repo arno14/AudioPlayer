@@ -15,7 +15,7 @@
           title="Playlist"
           :to="{ name: 'playlist', query: $route.query }"
         >
-          <v-badge>
+          <v-badge :color="playListCountChanged ? 'purple' : 'blue'">
             <template v-if="playlistCount" v-slot:badge>{{
               playlistCount
             }}</template>
@@ -72,7 +72,8 @@ export default {
       currentDir: {},
       countLoading: 0,
       volume: null,
-      term: null
+      term: null,
+      playListCountChanged: false
     };
   },
   computed: {
@@ -110,6 +111,12 @@ export default {
         this.applyResponse({ data });
       });
     });
+  },
+  watch: {
+    playlistCount(newval, oldval) {
+      this.playListCountChanged = true;
+      setTimeout(() => (this.playListCountChanged = false), 500);
+    }
   },
   methods: {
     play(i) {
