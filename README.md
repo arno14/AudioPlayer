@@ -44,7 +44,7 @@ node_modules/.bin/eslint assets/\*.vue --fix
 - OK / if remove item from playlist, stop playing it
 - OK / Explorateur: afficher si morceau en playlist
 - OK / message sur ajout (color sur nbre morceaux)
-- Explorateur: afficher si morceau en cours de lecture
+- OK / Explorateur: afficher si morceau en cours de lecture
 - select item from playlist to remove from playlist (drop button trash general)
 - gérer plusieurs playlist
 - gestion des erreurs

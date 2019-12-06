@@ -29,7 +29,10 @@
           <v-icon @click="$emit('list', i)" v-if="i.type == 'dir'"
             >fa fa-folder</v-icon
           >
-          <v-icon @click="$emit('play', i)" v-if="i.type == 'file'"
+          <v-icon
+            @click="$emit('play', i)"
+            :disabled="isPlaying(i)"
+            v-if="i.type == 'file'"
             >fa fa-music</v-icon
           >
         </v-list-item-icon>
@@ -129,6 +132,12 @@ export default {
       }
       return this.playlist.list.find(
         i => this.getItemFullPath(i) === this.getItemFullPath(item)
+      );
+    },
+    isPlaying(item) {
+      return (
+        this.getItemFullPath(item) ===
+        this.getItemFullPath(this.playlist.current)
       );
     }
   },
