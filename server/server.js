@@ -100,7 +100,15 @@ app.post('/playlist/add', (req, res) => {
 
 app.post('/playlist/remove', (req, res) => {
   const { item } = req.body;
-  playlist.remove(item).finally(renderAppState(res));
+  const inPlaylist = playlist.find(item);
+  playlist.remove(item).finally(() => {
+    if (!inPlaylist) {
+      renderAppState(res);
+    }
+    player.stop().then(() => {
+      player.start(playlist).finally(renderAppState(res));
+    });
+  });
 });
 
 app.post('/playlist/clear', (req, res) => {

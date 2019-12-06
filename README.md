@@ -41,10 +41,10 @@ node_modules/.bin/eslint assets/\*.vue --fix
 - OK / select item from Explorer to add in playlist
 - OK / bouton précédent/suivant
 - OK routing / Explorateur: garder en mémoire dernier dossier exploré
+- OK / if remove item from playlist, stop playing it
 - select item from playlist to remove from playlist (drop button trash general)
 - Explorateur: afficher si morceau en playlist ou en cours de lecture
 - gérer plusieurs playlist
 - gestion des erreurs
 - message sur ajout
-- if remove item from playlist, stop playing it
 - fonction pause
