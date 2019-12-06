@@ -156,11 +156,7 @@ export default {
       if (typeof i === 'string') {
         pathname = i;
       } else if (i) {
-        pathname = i.path
-          .split('/')
-          .concat([i.name])
-          .filter(Boolean)
-          .join('/');
+        pathname = this.getItemFullPath(i);
       }
       if (this.$route.query.pathname !== pathname) {
         // console.log("router replace pathname", pathname);

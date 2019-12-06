@@ -18,6 +18,21 @@ const routes = [
   { path: '/', redirect: '/playlist' }
 ];
 
+Vue.mixin({
+  methods: {
+    getItemFullPath(i) {
+      if (!i) {
+        return null;
+      }
+      return i.path
+        .split('/')
+        .concat([i.name])
+        .filter(Boolean)
+        .join('/');
+    }
+  }
+});
+
 // eslint-disable-next-line no-new
 new Vue({
   el: '#app',

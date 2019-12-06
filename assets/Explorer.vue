@@ -41,7 +41,12 @@
           <v-list-item-title v-text="i.name"></v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
-          <v-icon @click="$emit('playlistAdd', i)">fa fa-plus</v-icon>
+          <v-icon v-if="!isInPlaylist(i)" @click="$emit('playlistAdd', i)"
+            >fa fa-plus</v-icon
+          >
+          <v-icon v-if="isInPlaylist(i)" @click="$emit('playlistRemove', i)"
+            >fa fa-minus</v-icon
+          >
         </v-list-item-action>
       </v-list-item>
       <!-- button "More" -->
@@ -73,7 +78,7 @@ const COUNT_ITEM_STEP = 10;
 
 export default {
   name: 'Explorer',
-  props: ['currentDir', 'term', 'countLoading'],
+  props: ['currentDir', 'term', 'countLoading', 'playlist'],
   data() {
     return {
       requestedTerm: this.term,
@@ -111,6 +116,20 @@ export default {
         return;
       }
       this.maxCountItems += COUNT_ITEM_STEP;
+    },
+    isInPlaylist(item) {
+      if ('dir' === item.type) {
+        return false;
+      }
+      if (!this.playlist) {
+        return false;
+      }
+      if (!this.playlist.list) {
+        return false;
+      }
+      return this.playlist.list.find(
+        i => this.getItemFullPath(i) === this.getItemFullPath(item)
+      );
     }
   },
   watch: {
