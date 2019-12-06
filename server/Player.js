@@ -38,6 +38,9 @@ class Player {
 
   start(playlist) {
     const filename = playlist.currentFileName();
+    if (!filename) {
+      return this.getVolume();
+    }
     this.play(filename).then(res => {
       if (res.isStopped) {
         return;

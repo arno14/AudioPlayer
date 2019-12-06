@@ -100,14 +100,15 @@ app.post('/playlist/add', (req, res) => {
 
 app.post('/playlist/remove', (req, res) => {
   const { item } = req.body;
-  const inPlaylist = playlist.find(item);
+  const isPlaying = playlist.isCurrent(item);
   playlist.remove(item).finally(() => {
-    if (!inPlaylist) {
-      renderAppState(res);
+    if (!isPlaying) {
+      res.json(getAppState());
+    } else {
+      player.stop().then(() => {
+        player.start(playlist).finally(renderAppState(res));
+      });
     }
-    player.stop().then(() => {
-      player.start(playlist).finally(renderAppState(res));
-    });
   });
 });
 

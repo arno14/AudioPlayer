@@ -43,6 +43,18 @@ class Playlist {
     return null;
   }
 
+  isCurrent(item) {
+    if (!item) {
+      return false;
+    }
+    const itemIndex = this.find(item);
+    if (itemIndex >= 0) {
+      const isCurrent = this.currentIndex === itemIndex;
+      return isCurrent;
+    }
+    return false;
+  }
+
   currentFileName() {
     const current = this.current();
     if (!current) {
@@ -67,7 +79,15 @@ class Playlist {
     const existingIndex = this.find(item);
     if (existingIndex >= 0) {
       this.list.splice(existingIndex, 1);
-      this.currentIndex -= 1;
+      if (existingIndex === this.currentIndex) {
+        // if (this.list[this.currentIndex + 1]) {
+        //   this.currentIndex += 1;
+        // } else if (this.list[this.currentIndex - 1]) {
+        //   this.currentIndex -= 1;
+        // }
+      } else if (existingIndex < this.currentIndex) {
+        this.currentIndex -= 1;
+      }
     } else {
       this.logger.warn('remove(), not found', existingIndex);
     }
