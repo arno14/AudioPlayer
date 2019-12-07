@@ -50,27 +50,22 @@ class MPlayerProcess {
     return this.datas.ANS_PERCENT_POSITION;
   }
 
-  _getInfos() {
+  getInfos() {
     // @see http://www.mplayerhq.hu/DOCS/tech/slave.txt
     this.exec('get_time_length');
     this.exec('get_time_pos');
     this.exec('get_percent_pos');
   }
 
-  _exec(cmd) {
+  exec(cmd) {
     this.childProcess.stdin.write(`${cmd}\n`);
   }
 
-  _onData(data) {
-    // console.log('onData', data);
-
+  onData(data) {
     data.split('\n').forEach(line => {
-      //   console.log('data line=', line);
       const splitted = line.trim().split('=');
       if (splitted.length === 2) {
-        // console.log('splitted=', splitted, this.datas);
         this.datas[splitted[0]] = splitted[1];
-        // console.log(this.datas);
       }
     });
   }

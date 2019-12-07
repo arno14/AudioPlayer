@@ -225,7 +225,7 @@ export default {
   border: 1px dashed black;
 }
 .content {
-  margin-top: 3.5em;
+  margin-top: 4em;
   margin-bottom: 3.5em;
 }
 </style>
