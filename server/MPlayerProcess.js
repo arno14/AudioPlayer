@@ -29,9 +29,11 @@ class MPlayerProcess {
   }
 
   pause() {
-    this.getInfos();
-    this.isPaused = !this.isPaused;
+    if (!this.isPaused) {
+      this.getInfos();
+    }
     this.exec('pause');
+    this.isPaused = !this.isPaused;
   }
 
   kill() {
