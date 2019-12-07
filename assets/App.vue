@@ -8,6 +8,22 @@
       <v-btn icon @click="play()" v-if="!isPlaying && filename" title="Stop">
         <v-icon>fa fa-play</v-icon>
       </v-btn>
+      <v-btn
+        icon
+        @click="pause()"
+        v-if="isPlaying && filename && !isPaused"
+        title="Pause/Unpause"
+      >
+        <v-icon>fa fa-pause</v-icon>
+      </v-btn>
+      <v-btn
+        icon
+        @click="pause()"
+        v-if="isPlaying && filename && isPaused"
+        title="Pause/Unpause"
+      >
+        <v-icon>fa fa-play</v-icon>
+      </v-btn>
       <v-spacer></v-spacer>
       <v-toolbar-items>
         <v-btn
@@ -33,6 +49,7 @@
     </v-app-bar>
     <!-- <span class="spacer"></span> -->
     <div class="content">
+      <v-progress-linear :value="positionPercent"></v-progress-linear>
       <router-view
         v-bind:currentDir="currentDir"
         v-bind:playlist="playlist"
@@ -68,6 +85,8 @@ export default {
   data() {
     return {
       isPlaying: false,
+      isPaused: null,
+      position: null,
       playlist: null,
       currentDir: {},
       countLoading: 0,
@@ -77,6 +96,11 @@ export default {
     };
   },
   computed: {
+    positionPercent() {
+      if (this.position) {
+        return this.position.percent;
+      }
+    },
     filename() {
       if (this.playlist && this.playlist.current) {
         return this.playlist.current.name;
@@ -128,9 +152,9 @@ export default {
     volumeChange(volume) {
       axios.post(`${playerpath}volume`, { volume }).then(this.applyResponse);
     },
-    // pause() {
-    //   axios.post(playerpath + "pause").then(this.applyResponse);
-    // },
+    pause() {
+      axios.post(playerpath + 'pause').then(this.applyResponse);
+    },
     playlistAdd(i) {
       axios
         .post(`${playerpath}playlist/add`, { item: i })
@@ -178,6 +202,8 @@ export default {
       });
     },
     applyResponse(resp) {
+      this.position = resp.data.position;
+      this.isPaused = resp.data.isPaused;
       this.countLoading -= 1;
       this.isPlaying = resp.data.isPlaying;
       this.playlist = resp.data.playlist;

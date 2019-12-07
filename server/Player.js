@@ -1,10 +1,6 @@
-const playsound = require('play-sound')();
 const loudness = require('loudness');
 
-// opts = {
-// players:['mplayer','afplay', 'mpg123','mpg321','play','omxplayer', 'aplay','cmdmp3'],
-// player:'aplay'
-// }
+const MPlayerProcess = require('./MPlayerProcess.js');
 
 class Player {
   constructor(logger) {
@@ -64,7 +60,7 @@ class Player {
     this.promise = new Promise(resolve => {
       this.isPlaying = true;
       this.isStopped = false;
-      this.audio = playsound.play(filename, err => {
+      this.audio = new MPlayerProcess(filename, err => {
         const resolution = {
           filename,
           isStopped: this.isStopped
@@ -98,6 +94,37 @@ class Player {
       this.audio.kill();
     }
     return this.promise;
+  }
+
+  pause() {
+    if (this.audio && this.isPlaying) {
+      this.audio.pause();
+    }
+    return new Promise(resolve => {
+      resolve();
+    });
+  }
+
+  isPaused() {
+    if (this.audio) {
+      return this.audio.isPaused;
+    }
+    return false;
+  }
+
+  getPosition() {
+    if (this.audio) {
+      return {
+        percent: this.audio.getPercent(),
+        length: this.audio.getLength(),
+        pos: this.audio.getPos()
+      };
+    }
+    return {
+      percent: null,
+      length: null,
+      pos: null
+    };
   }
 }
 

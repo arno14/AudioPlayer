@@ -47,6 +47,8 @@ function getAppState() {
   return {
     volume: player.volume,
     isPlaying: player.isPlaying,
+    position: player.getPosition(),
+    isPaused: player.isPaused(),
     playlist: {
       list: playlist.list,
       currentIndex: playlist.currentIndex,
@@ -73,6 +75,12 @@ player.onMusicStop = () => {
     io.emit('appState', getAppState());
   });
 };
+
+setInterval(() => {
+  if (player.isPlaying && !player.isPaused()) {
+    io.emit('appState', getAppState());
+  }
+}, 5000);
 
 app.get('/', (req, res) => {
   fs.readFile(`${__dirname}/index.html`, 'utf8', (err, html) => {
@@ -133,6 +141,10 @@ app.post('/volume', (req, res) => {
 
 app.post('/stop', (req, res) => {
   player.stop().then(renderAppState(res));
+});
+
+app.post('/pause', (req, res) => {
+  player.pause().then(renderAppState(res));
 });
 
 // route non trouvé

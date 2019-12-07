@@ -45,7 +45,8 @@ node_modules/.bin/eslint assets/\*.vue --fix
 - OK / Explorateur: afficher si morceau en playlist
 - OK / message sur ajout (color sur nbre morceaux)
 - OK / Explorateur: afficher si morceau en cours de lecture
+- OK / fonction pause
+- OK / voir avancement du morceau
 - select item from playlist to remove from playlist (drop button trash general)
 - gérer plusieurs playlist
 - gestion des erreurs
-- fonction pause
