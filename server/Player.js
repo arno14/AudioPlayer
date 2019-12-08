@@ -60,18 +60,12 @@ class Player {
     this.promise = new Promise(resolve => {
       this.isPlaying = true;
       this.isStopped = false;
-      this.audio = new MPlayerProcess(filename, err => {
+      this.audio = new MPlayerProcess(filename, () => {
         const resolution = {
           filename,
           isStopped: this.isStopped
         };
-        this.logger.log(
-          'endplay(',
-          filename,
-          ')',
-          err,
-          this.isStopped ? 'stopped' : ''
-        );
+        this.logger.log('endplay(', filename, ')');
         this.isPlaying = false;
         this.isStopped = false;
         this.onMusicStop();
@@ -112,9 +106,9 @@ class Player {
     return false;
   }
 
-  seek(seek) {
+  seek(targetPercent) {
     if (this.audio && this.isPlaying) {
-      return this.audio.seek(seek);
+      return this.audio.seek(targetPercent);
     }
     return new Promise(resolve => resolve());
   }

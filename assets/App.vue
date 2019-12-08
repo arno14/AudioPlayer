@@ -62,7 +62,7 @@
         @stop="stop"
         @playlistAdd="playlistAdd"
         @playlistRemove="playlistRemove"
-        @volumeChange="volumeChange"
+        @volume="volumeChange"
         @search="search"
         @seek="seek"
       ></router-view>
@@ -78,7 +78,6 @@ const axios = require('axios');
 const socket = io({
   transports: ['websocket']
 }).connect();
-// const socket = io.connect(); // localhost:8015
 
 const playerpath = '/';
 export default {
@@ -115,11 +114,12 @@ export default {
     axios.get(`${playerpath}app-state`).then(resp => {
       this.applyResponse(resp);
       if (!this.playlistCount && this.$route.name !== 'explorer') {
-        //redirect to Explorer if playlist is empty
+        // redirect to Explorer if playlist is empty
         this.$router.replace({ name: 'explorer', query: this.$route.query });
       }
     });
 
+    // trigger explorer search from params in route
     if (this.$route.query.term) {
       this.search(this.$route.query.term);
     } else {
@@ -133,26 +133,57 @@ export default {
     });
   },
   watch: {
-    playlistCount(newval, oldval) {
+    playlistCount() {
       this.playListCountChanged = true;
-      setTimeout(() => (this.playListCountChanged = false), 500);
+      setTimeout(() => {
+        this.playListCountChanged = false;
+      }, 500);
     }
   },
   methods: {
-    seek(seek) {
-      axios.post('seek', { seek }).then(this.applyResponse);
-    },
     play(i) {
       axios.post(`${playerpath}play`, { item: i }).then(this.applyResponse);
     },
     stop() {
       axios.post(`${playerpath}stop`).then(this.applyResponse);
     },
-    volumeChange(volume) {
-      axios.post(`${playerpath}volume`, { volume }).then(this.applyResponse);
-    },
     pause() {
-      axios.post(playerpath + 'pause').then(this.applyResponse);
+      axios.post(`${playerpath}pause`).then(this.applyResponse);
+    },
+    seek(targetPercent) {
+      axios.post('seek', { targetPercent }).then(this.applyResponse);
+    },
+    volumeChange(targetVolume) {
+      axios
+        .post(`${playerpath}volume`, { volume: targetVolume })
+        .then(this.applyResponse);
+    },
+    search(term) {
+      this.term = term;
+      this.countLoading += 1;
+      if (this.$route.query.term !== term) {
+        this.$router.replace({ query: { term } });
+      }
+      axios.get(`${playerpath}list`, { params: { term } }).then(resp => {
+        this.countLoading -= 1;
+        this.currentDir = resp.data;
+      });
+    },
+    list(i = null) {
+      let pathname = null;
+      if (typeof i === 'string') {
+        pathname = i;
+      } else if (i) {
+        pathname = this.getItemFullPath(i);
+      }
+      if (this.$route.query.pathname !== pathname) {
+        this.$router.replace({ query: { pathname } });
+      }
+      this.countLoading += 1;
+      axios.get(`${playerpath}list`, { params: { pathname } }).then(resp => {
+        this.countLoading -= 1;
+        this.currentDir = resp.data;
+      });
     },
     playlistAdd(i) {
       axios
@@ -166,39 +197,6 @@ export default {
     },
     playlistClear() {
       axios.post(`${playerpath}playlist/clear`).then(this.applyResponse);
-    },
-    search(term) {
-      this.term = term;
-      this.countLoading += 1;
-      if (this.$route.query.term !== term) {
-        // console.log("router replace pathname", pathname);
-        this.$router.replace({ query: { term } });
-      }
-      axios.get(`${playerpath}list`, { params: { term } }).then(resp => {
-        // console.log("post list ", i, this.$route.query)
-        this.countLoading -= 1;
-        this.currentDir = resp.data;
-      });
-    },
-    list(i = null) {
-      // console.log("list ", i, this.$route.query);
-      let pathname = null;
-      if (typeof i === 'string') {
-        pathname = i;
-      } else if (i) {
-        pathname = this.getItemFullPath(i);
-      }
-      if (this.$route.query.pathname !== pathname) {
-        // console.log("router replace pathname", pathname);
-        this.$router.replace({ query: { pathname } });
-      }
-
-      this.countLoading += 1;
-      axios.get(`${playerpath}list`, { params: { pathname } }).then(resp => {
-        // console.log("post list ", i, this.$route.query)
-        this.countLoading -= 1;
-        this.currentDir = resp.data;
-      });
     },
     applyResponse(resp, decrementCountLoading = true) {
       if (decrementCountLoading) {
@@ -219,14 +217,11 @@ export default {
 .v-list-item__action {
   align-self: flex-start !important;
 }
-.router-link.router-link-active {
-  background: red;
-}
 .active_playing {
   border: 1px dashed black;
 }
 .content {
-  margin-top: 4em;
+  margin-top: 3.5em;
   margin-bottom: 3.5em;
 }
 </style>

@@ -16,7 +16,7 @@ class MPlayerProcess {
 
     const interval = setInterval(() => {
       if (!this.isPaused) {
-        // NB requesting info restart the process if paused
+        // NB requesting info restarts the process if paused
         this.getInfos();
       }
     }, 1000); // request state regulary

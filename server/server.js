@@ -27,22 +27,13 @@ const loggers = {
   controller: new Logger('controller')
 };
 
-io.on('connection', client => {
-  loggers.websocket.log('connection', client);
-});
-
-// let counter = 0,
-//     interval = 10000;
-// setInterval(() => {
-//   counter+=interval;
-//   loggers.websocket.log('emit ping', counter);
-//   io.emit('ping', { since: counter });
-// }, interval);
-
 const finder = new Finder(DATADIR, loggers.finder);
 const playlist = new PlayList(finder, SAVEPATH, loggers.playlist);
 const player = new Player(loggers.player);
 
+/**
+ * UTILITY FUNCTIONS
+ */
 function getAppState() {
   return {
     volume: player.volume,
@@ -63,6 +54,13 @@ function renderAppState(resp) {
   };
 }
 
+/**
+ * WEBSOCKET
+ */
+io.on('connection', client => {
+  loggers.websocket.log('connection', client);
+});
+
 player.onMusicPlay = () => {
   loggers.websocket.log('onMusicPlay, emit appState');
   player.getVolume().then(() => {
@@ -82,6 +80,9 @@ setInterval(() => {
   }
 }, 1000);
 
+/**
+ * HTTP ROUTING
+ */
 app.get('/', (req, res) => {
   fs.readFile(`${__dirname}/index.html`, 'utf8', (err, html) => {
     res.send(html);
@@ -90,6 +91,33 @@ app.get('/', (req, res) => {
 
 app.get('/app-state', (req, res) => {
   player.getVolume().then(renderAppState(res));
+});
+
+app.post('/play', (req, res) => {
+  player.stop().then(() => {
+    if (req.body.item) {
+      playlist.replace(req.body.item);
+    }
+    player.start(playlist).finally(renderAppState(res));
+  });
+});
+
+app.post('/stop', (req, res) => {
+  player.stop().then(renderAppState(res));
+});
+
+app.post('/pause', (req, res) => {
+  player.pause().then(renderAppState(res));
+});
+
+app.post('/volume', (req, res) => {
+  const { volume } = req.body;
+  player.setVolume(volume).finally(renderAppState(res));
+});
+
+app.post('/seek', (req, res) => {
+  const { targetPercent } = req.body;
+  player.seek(targetPercent).finally(renderAppState(res));
 });
 
 app.get('/list', (req, res) => {
@@ -125,37 +153,10 @@ app.post('/playlist/clear', (req, res) => {
   player.stop().finally(renderAppState(res));
 });
 
-app.post('/play', (req, res) => {
-  player.stop().then(() => {
-    if (req.body.item) {
-      playlist.replace(req.body.item);
-    }
-    player.start(playlist).finally(renderAppState(res));
-  });
-});
-
-app.post('/volume', (req, res) => {
-  const { volume } = req.body;
-  player.setVolume(volume).finally(renderAppState(res));
-});
-
-app.post('/stop', (req, res) => {
-  player.stop().then(renderAppState(res));
-});
-
-app.post('/pause', (req, res) => {
-  player.pause().then(renderAppState(res));
-});
-
-app.post('/seek', (req, res) => {
-  const { seek } = req.body;
-  player.seek(seek).finally(renderAppState(res));
-});
-
-// route non trouvé
+// on route not found
 app.use((req, res /* , next */) => {
   res.setHeader('Content-Type', 'text/plain');
-  res.status(404).send('Page introuvable !');
+  res.status(404).send('Page not found !');
 });
 
 server.listen(PORT, () => {

@@ -47,7 +47,7 @@
       </v-btn>
       <v-container fill-height>
         <v-slider
-          @change="$emit('volumeChange', requestedVolume)"
+          @change="$emit('volume', requestedVolume)"
           min="0"
           max="100"
           prepend-icon="fa fa-volume-up"
@@ -81,11 +81,6 @@ export default {
     }
   },
   computed: {
-    positionPercent() {
-      if (this.position) {
-        return this.position.percent;
-      }
-    },
     hasPlaylist() {
       return this.playlist ? this.playlist.list.length > 0 : false;
     },
@@ -100,6 +95,12 @@ export default {
         return false;
       }
       return this.playlist.currentIndex === this.playlist.list.length - 1;
+    },
+    positionPercent() {
+      if (this.position) {
+        return this.position.percent;
+      }
+      return 0;
     }
   },
   methods: {

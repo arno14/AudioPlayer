@@ -79,13 +79,7 @@ class Playlist {
     const existingIndex = this.find(item);
     if (existingIndex >= 0) {
       this.list.splice(existingIndex, 1);
-      if (existingIndex === this.currentIndex) {
-        // if (this.list[this.currentIndex + 1]) {
-        //   this.currentIndex += 1;
-        // } else if (this.list[this.currentIndex - 1]) {
-        //   this.currentIndex -= 1;
-        // }
-      } else if (existingIndex < this.currentIndex) {
+      if (existingIndex < this.currentIndex) {
         this.currentIndex -= 1;
       }
     } else {

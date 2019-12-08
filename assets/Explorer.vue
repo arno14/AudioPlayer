@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 <template>
   <div>
     <v-list>
@@ -77,7 +75,7 @@
 </template>
 
 <script>
-const COUNT_ITEM_STEP = 10;
+const COUNT_ITEM_STEP = 20;
 
 export default {
   name: 'Explorer',
@@ -85,18 +83,18 @@ export default {
   data() {
     return {
       requestedTerm: this.term,
-      maxCountItems: COUNT_ITEM_STEP //nbre d'item à afficher
+      maxCountItems: COUNT_ITEM_STEP // count item to be displayed
     };
   },
   computed: {
     currentList() {
-      if (!this.currentDir) {
-        return [];
+      if (this.currentDir && this.currentDir.list) {
+        return this.currentDir.list;
       }
-      if (!this.currentDir.list) {
-        return [];
-      }
-      return this.currentDir.list;
+      return [];
+    },
+    currentItemFullPath() {
+      return this.getItemFullPath(this.playlist ? this.playlist.current : null);
     },
     isSearchMode() {
       return this.term !== '';
@@ -105,12 +103,8 @@ export default {
       return this.reducedList.length === this.currentList.length;
     },
     reducedList() {
-      return this.currentList.reduce((accumulator, value, index) => {
-        if (index < this.maxCountItems) {
-          accumulator.push(value);
-        }
-        return accumulator;
-      }, []);
+      // reduce the number of items to display, in order to  make UX more reactive (less html tag)
+      return this.currentList.slice(0, this.maxCountItems);
     }
   },
   methods: {
@@ -121,7 +115,7 @@ export default {
       this.maxCountItems += COUNT_ITEM_STEP;
     },
     isInPlaylist(item) {
-      if ('dir' === item.type) {
+      if (item.type === 'dir') {
         return false;
       }
       if (!this.playlist) {
@@ -135,10 +129,7 @@ export default {
       );
     },
     isPlaying(item) {
-      return (
-        this.getItemFullPath(item) ===
-        this.getItemFullPath(this.playlist.current)
-      );
+      return this.getItemFullPath(item) === this.currentItemFullPath;
     }
   },
   watch: {

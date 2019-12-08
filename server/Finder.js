@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const find = require('find');
 
+// for ordering the list with dir first
 const itemComparator = (a, b) => {
   if (a.type !== b.type) {
     return a.type === 'dir' ? -1 : 1;
@@ -15,7 +16,7 @@ const itemComparator = (a, b) => {
   return 0;
 };
 
-const audioExtension = /.mp3|.wav|.wma/i;
+const AUDIO_EXTENSIONS = /.mp3|.wav|.wma/i;
 
 class Finder {
   constructor(basePath, logger) {
@@ -37,7 +38,7 @@ class Finder {
       const item = { type, name: paths[paths.length - 1] };
       paths.pop();
       item.path = paths.join('/');
-      if (type === 'file' && !item.name.match(audioExtension)) {
+      if (type === 'file' && !item.name.match(AUDIO_EXTENSIONS)) {
         return;
       }
       resolution.list.push(item);
@@ -103,7 +104,7 @@ class Finder {
         path: directory
       };
       if (i.type === 'file') {
-        if (!i.name.match(audioExtension)) {
+        if (!i.name.match(AUDIO_EXTENSIONS)) {
           // eslint-disable-next-line no-continue
           continue;
         }
