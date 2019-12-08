@@ -80,7 +80,7 @@ setInterval(() => {
   if (player.isPlaying && !player.isPaused()) {
     io.emit('appState', getAppState());
   }
-}, 5000);
+}, 1000);
 
 app.get('/', (req, res) => {
   fs.readFile(`${__dirname}/index.html`, 'utf8', (err, html) => {
@@ -95,7 +95,7 @@ app.get('/app-state', (req, res) => {
 app.get('/list', (req, res) => {
   const { term, pathname } = req.query;
   if (term) {
-    finder.filter(term).then(f => res.json(f));
+    finder.filter(term.trim()).then(f => res.json(f));
   } else {
     finder.getContent(pathname).then(f => res.json(f));
   }
@@ -145,6 +145,11 @@ app.post('/stop', (req, res) => {
 
 app.post('/pause', (req, res) => {
   player.pause().then(renderAppState(res));
+});
+
+app.post('/seek', (req, res) => {
+  const { seek } = req.body;
+  player.seek(seek).finally(renderAppState(res));
 });
 
 // route non trouvé

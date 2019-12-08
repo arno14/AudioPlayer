@@ -112,6 +112,13 @@ class Player {
     return false;
   }
 
+  seek(seek) {
+    if (this.audio && this.isPlaying) {
+      return this.audio.seek(seek);
+    }
+    return new Promise(resolve => resolve());
+  }
+
   getPosition() {
     if (this.audio) {
       return {

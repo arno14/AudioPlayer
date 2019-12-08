@@ -46,10 +46,16 @@
           <v-icon>fa fa-folder-open</v-icon>
         </v-btn>
       </v-toolbar-items>
+      <!-- <v-slider absolute bottom value="33"></v-slider> -->
+      <v-progress-linear
+        @click="seek"
+        absolute
+        bottom
+        height="8"
+        :value="positionPercent"
+      ></v-progress-linear>
     </v-app-bar>
-    <!-- <span class="spacer"></span> -->
     <div class="content">
-      <v-progress-linear :value="positionPercent"></v-progress-linear>
       <router-view
         v-bind:currentDir="currentDir"
         v-bind:playlist="playlist"
@@ -143,6 +149,10 @@ export default {
     }
   },
   methods: {
+    seek(e) {
+      const targetPercent = Math.trunc((e.clientX / window.innerWidth) * 100);
+      axios.post('seek', { seek: targetPercent }).then(this.applyResponse);
+    },
     play(i) {
       axios.post(`${playerpath}play`, { item: i }).then(this.applyResponse);
     },
