@@ -29,6 +29,13 @@
       </v-list-item>
     </v-list>
     <v-app-bar fixed bottom dark v-if="hasPlaylist">
+      <v-progress-linear
+        @click="onSeek"
+        absolute
+        top
+        height="8"
+        :value="positionPercent"
+      ></v-progress-linear>
       <v-btn icon>
         <v-icon
           title="Previous"
@@ -59,7 +66,7 @@
 <script>
 export default {
   name: 'Playlist',
-  props: ['playlist', 'isPlaying', 'volume'],
+  props: ['playlist', 'isPlaying', 'volume', 'position'],
   data() {
     return {
       requestedVolume: null
@@ -74,6 +81,11 @@ export default {
     }
   },
   computed: {
+    positionPercent() {
+      if (this.position) {
+        return this.position.percent;
+      }
+    },
     hasPlaylist() {
       return this.playlist ? this.playlist.list.length > 0 : false;
     },
@@ -98,6 +110,10 @@ export default {
     playNext() {
       const item = this.playlist.list[this.playlist.currentIndex + 1];
       this.$emit('play', item);
+    },
+    onSeek(e) {
+      const targetPercent = Math.trunc((e.clientX / window.innerWidth) * 100);
+      this.$emit('seek', targetPercent);
     }
   }
 };

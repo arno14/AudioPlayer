@@ -47,22 +47,16 @@
         </v-btn>
       </v-toolbar-items>
       <!-- <v-slider absolute bottom value="33"></v-slider> -->
-      <v-progress-linear
-        @click="seek"
-        absolute
-        bottom
-        height="8"
-        :value="positionPercent"
-      ></v-progress-linear>
     </v-app-bar>
     <div class="content">
       <router-view
-        v-bind:currentDir="currentDir"
-        v-bind:playlist="playlist"
-        v-bind:isPlaying="isPlaying"
-        v-bind:volume="volume"
-        v-bind:term="term"
-        v-bind:countLoading="countLoading"
+        :currentDir="currentDir"
+        :playlist="playlist"
+        :isPlaying="isPlaying"
+        :volume="volume"
+        :term="term"
+        :countLoading="countLoading"
+        :position="position"
         @list="list"
         @play="play"
         @stop="stop"
@@ -70,6 +64,7 @@
         @playlistRemove="playlistRemove"
         @volumeChange="volumeChange"
         @search="search"
+        @seek="seek"
       ></router-view>
     </div>
   </v-app>
@@ -102,11 +97,6 @@ export default {
     };
   },
   computed: {
-    positionPercent() {
-      if (this.position) {
-        return this.position.percent;
-      }
-    },
     filename() {
       if (this.playlist && this.playlist.current) {
         return this.playlist.current.name;
@@ -138,7 +128,7 @@ export default {
 
     socket.on('connect', () => {
       socket.on('appState', data => {
-        this.applyResponse({ data });
+        this.applyResponse({ data }, false);
       });
     });
   },
@@ -149,9 +139,8 @@ export default {
     }
   },
   methods: {
-    seek(e) {
-      const targetPercent = Math.trunc((e.clientX / window.innerWidth) * 100);
-      axios.post('seek', { seek: targetPercent }).then(this.applyResponse);
+    seek(seek) {
+      axios.post('seek', { seek }).then(this.applyResponse);
     },
     play(i) {
       axios.post(`${playerpath}play`, { item: i }).then(this.applyResponse);
@@ -211,10 +200,12 @@ export default {
         this.currentDir = resp.data;
       });
     },
-    applyResponse(resp) {
+    applyResponse(resp, decrementCountLoading = true) {
+      if (decrementCountLoading) {
+        this.countLoading -= 1;
+      }
       this.position = resp.data.position;
       this.isPaused = resp.data.isPaused;
-      this.countLoading -= 1;
       this.isPlaying = resp.data.isPlaying;
       this.playlist = resp.data.playlist;
       this.volume = resp.data.volume;
