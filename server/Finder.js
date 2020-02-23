@@ -7,10 +7,10 @@ const itemComparator = (a, b) => {
   if (a.type !== b.type) {
     return a.type === 'dir' ? -1 : 1;
   }
-  if (a.name < b.name) {
+  if (a.name.toLowerCase() < b.name.toLowerCase()) {
     return -1;
   }
-  if (a.name > b.name) {
+  if (a.name.toLowerCase() > b.name.toLowerCase()) {
     return 1;
   }
   return 0;
