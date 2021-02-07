@@ -14,6 +14,7 @@ class MPlayerProcess {
     );
     this.childProcess.stdout.setEncoding('utf8');
     this.childProcess.stdout.on('data', data => this.onData(data)); // NB si pas de arrow function, problem de this
+    this.childProcess.stderr.on('data', data => this.onData(data, 'error')); // NB si pas de arrow function, problem de this
 
     const interval = setInterval(() => {
       if (!this.isPaused) {
@@ -79,8 +80,14 @@ class MPlayerProcess {
     });
   }
 
-  onData(data) {
+  onData(data, type) {
+    if (type === 'error') {
+      this.logger.warn('onMPlayerErr', data);
+      return;
+    }
+
     this.logger.log('onMPlayerData', data);
+
     data.split('\n').forEach(line => {
       const splitted = line.trim().split('=');
       if (splitted.length === 2) {

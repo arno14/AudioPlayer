@@ -1,16 +1,14 @@
-require('dotenv').config();
-
-const PORT = process.env.SERVER_PORT;
-const DATADIR = process.env.DATA_PATH;
-const SAVEPATH = process.env.SAVE_PATH;
-const DEBUG = process.env.DEBUG;
-
 const express = require('express');
 const fs = require('fs');
 
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+
+require('dotenv').config();
+/* eslint-disable object-curly-newline */
+const { SERVER_PORT, DATA_PATH, SAVE_PATH, DEBUG } = process.env;
+/* eslint-enable object-curly-newline */
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -28,8 +26,8 @@ const loggers = {
   controller: new Logger('controller', DEBUG)
 };
 
-const finder = new Finder(DATADIR, loggers.finder);
-const playlist = new PlayList(finder, SAVEPATH, loggers.playlist);
+const finder = new Finder(DATA_PATH, loggers.finder);
+const playlist = new PlayList(finder, SAVE_PATH, loggers.playlist);
 const player = new Player(loggers.player);
 
 /**
@@ -160,6 +158,8 @@ app.use((req, res /* , next */) => {
   res.status(404).send('Page not found !');
 });
 
-server.listen(PORT, () => {
-  loggers.controller.log(` ### Example app is listening on port ${PORT}`);
+server.listen(SERVER_PORT, () => {
+  loggers.controller.log(
+    ` ### Example app is listening on port ${SERVER_PORT}`
+  );
 });
