@@ -20,7 +20,7 @@ cp .env.dist .env
 
 nano .env
 
-node_modules/.bin/encore production
+npm run encore-prod
 
 npm run server
 

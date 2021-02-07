@@ -24,7 +24,7 @@
   },
   "scripts": {
     "server": "supervisor --watch server server/server.js",
-    "encore": "encore dev --watch",
+    "encore-dev": "encore dev --watch",
     "encore-prod": "encore production",
     "eslint": "eslint",
     "eslint-all": "eslint assets/*.vue && eslint assets/*.js && eslint server/*.js; exit 0"
