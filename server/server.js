@@ -56,8 +56,8 @@ function renderAppState(resp) {
 /**
  * WEBSOCKET
  */
-io.on('connection', client => {
-  loggers.websocket.log('connection', client);
+io.on('connection', () => {
+  loggers.websocket.log('connection');
 });
 
 player.onMusicPlay = () => {
