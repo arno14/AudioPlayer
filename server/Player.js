@@ -60,7 +60,7 @@ class Player {
     this.promise = new Promise(resolve => {
       this.isPlaying = true;
       this.isStopped = false;
-      this.audio = new MPlayerProcess(filename, () => {
+      this.audio = new MPlayerProcess(filename, this.logger, () => {
         const resolution = {
           filename,
           isStopped: this.isStopped

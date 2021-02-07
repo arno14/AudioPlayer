@@ -1,7 +1,8 @@
 const cp = require('child_process');
 
 class MPlayerProcess {
-  constructor(file, onEnd) {
+  constructor(file, logger, onEnd) {
+    this.logger = logger;
     this.isPaused = false;
     this.file = file;
     this.resolutions = {};
@@ -79,6 +80,7 @@ class MPlayerProcess {
   }
 
   onData(data) {
+    this.logger.log('onMPlayerData', data);
     data.split('\n').forEach(line => {
       const splitted = line.trim().split('=');
       if (splitted.length === 2) {
