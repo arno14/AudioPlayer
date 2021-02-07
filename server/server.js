@@ -3,6 +3,7 @@ require('dotenv').config();
 const PORT = process.env.SERVER_PORT;
 const DATADIR = process.env.DATA_PATH;
 const SAVEPATH = process.env.SAVE_PATH;
+const DEBUG = process.env.DEBUG;
 
 const express = require('express');
 const fs = require('fs');
@@ -20,11 +21,11 @@ const Finder = require('./Finder.js');
 const Logger = require('./Logger.js');
 
 const loggers = {
-  finder: new Logger('finder'),
-  playlist: new Logger('playlist'),
-  player: new Logger('player'),
-  websocket: new Logger('websocket'),
-  controller: new Logger('controller')
+  finder: new Logger('finder', DEBUG),
+  playlist: new Logger('playlist', DEBUG),
+  player: new Logger('player', DEBUG),
+  websocket: new Logger('websocket', DEBUG),
+  controller: new Logger('controller', DEBUG)
 };
 
 const finder = new Finder(DATADIR, loggers.finder);

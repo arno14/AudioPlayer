@@ -7,7 +7,7 @@ class Logger {
     }
     this.channel += ': ';
 
-    this.isVerbose = isVerbose;
+    this.isVerbose = !!isVerbose;
   }
 
   log() {
