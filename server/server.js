@@ -7,7 +7,8 @@ const io = require('socket.io')(server);
 
 require('dotenv').config();
 /* eslint-disable object-curly-newline */
-const { SERVER_PORT, DATA_PATH, SAVE_PATH, DEBUG } = process.env;
+const { SERVER_PORT, DATA_PATH, SAVE_PATH } = process.env;
+const DEBUG = process.env.DEBUG === 'true';
 /* eslint-enable object-curly-newline */
 
 app.use(express.json());
@@ -18,13 +19,10 @@ const PlayList = require('./Playlist.js');
 const Finder = require('./Finder.js');
 const Logger = require('./Logger.js');
 
-const loggers = {
-  finder: new Logger('finder', DEBUG),
-  playlist: new Logger('playlist', DEBUG),
-  player: new Logger('player', DEBUG),
-  websocket: new Logger('websocket', DEBUG),
-  controller: new Logger('controller', DEBUG)
-};
+const loggers = {};
+'finder,playlist,player,websocket,controller'.split(',').forEach(loggerName => {
+  loggers[loggerName] = new Logger(loggerName, DEBUG);
+});
 
 const finder = new Finder(DATA_PATH, loggers.finder);
 const playlist = new PlayList(finder, SAVE_PATH, loggers.playlist);

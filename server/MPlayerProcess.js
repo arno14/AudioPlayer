@@ -14,7 +14,9 @@ class MPlayerProcess {
     );
     this.childProcess.stdout.setEncoding('utf8');
     this.childProcess.stdout.on('data', data => this.onData(data)); // NB si pas de arrow function, problem de this
-    this.childProcess.stderr.on('data', data => this.onData(data, 'error')); // NB si pas de arrow function, problem de this
+    if (logger.isVerbose) {
+      this.childProcess.stderr.on('data', data => this.onData(data, 'error')); // NB si pas de arrow function, problem de this
+    }
 
     const interval = setInterval(() => {
       if (!this.isPaused) {
